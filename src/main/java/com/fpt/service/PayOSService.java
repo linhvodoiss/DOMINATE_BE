@@ -92,7 +92,7 @@ public class PayOSService {
         Map body = response.getBody();
         if (body == null || !"00".equals(body.get("code"))) {
             ObjectMapper mapper = new ObjectMapper();
-            throw new IllegalStateException("Phản hồi PayOS lỗi: " + mapper.writeValueAsString(body));
+            throw new IllegalStateException("Phản hồi từ PayOS lỗi: " + mapper.writeValueAsString(body));
         }
 
         Map<String, Object> data = (Map<String, Object>) body.get("data");
