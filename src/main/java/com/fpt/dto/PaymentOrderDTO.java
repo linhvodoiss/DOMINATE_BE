@@ -1,0 +1,24 @@
+package com.fpt.dto;
+
+import lombok.*;
+
+import java.time.LocalDateTime;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class PaymentOrderDTO {
+    private Long id;
+    private Integer orderId;
+    private String paymentLink;
+    private String paymentStatus;
+    private String paymentMethod;
+    private Long userId;
+    private Long subscriptionId;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private SubscriptionPackageDTO subscription;
+}
+
+

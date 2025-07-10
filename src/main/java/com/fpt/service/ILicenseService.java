@@ -1,0 +1,27 @@
+package com.fpt.service;
+
+import com.fpt.dto.LicenseDTO;
+import com.fpt.dto.PaymentOrderDTO;
+import com.fpt.dto.UserLicenseViewDTO;
+import com.fpt.entity.License;
+import com.fpt.entity.PaymentOrder;
+import com.fpt.form.LicenseCreateForm;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import java.util.List;
+
+public interface ILicenseService {
+    Page<LicenseDTO> getAllLicense(Pageable pageable, String search);
+    Page<LicenseDTO> getUserLicense(Pageable pageable, String search,Long userId);
+    List<LicenseDTO> convertToDto(List<License> licenses);
+    List<LicenseDTO> getAll();
+    LicenseDTO getById(Long id);
+
+    LicenseDTO create(LicenseDTO dto);
+    LicenseDTO createLicense(LicenseCreateForm form);
+    LicenseDTO activateNextLicense(Long userId);
+    LicenseDTO update(Long id, LicenseDTO dto);
+    void delete(Long id);
+    List<LicenseDTO> getByUserId(Long userId);
+}
