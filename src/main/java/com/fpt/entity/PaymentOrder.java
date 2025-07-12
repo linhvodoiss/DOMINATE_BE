@@ -30,6 +30,18 @@ public class PaymentOrder {
 
     private String paymentLink;
 
+    @Column(name = "payos_bin")
+    private String bin;
+
+    @Column(name = "payos_account_name")
+    private String accountName;
+
+    @Column(name = "payos_account_number")
+    private String accountNumber;
+
+    @Column(name = "payos_qr_code", columnDefinition = "TEXT")
+    private String qrCode;
+
     @Enumerated(EnumType.STRING)
     private PaymentStatus paymentStatus = PaymentStatus.PENDING;
 
@@ -47,6 +59,6 @@ public class PaymentOrder {
         PENDING, SUCCESS, FAILED
     }
     public enum PaymentMethod {
-        MOMO, VNPAY, BANK
+        PAYOS, BANK
     }
 }

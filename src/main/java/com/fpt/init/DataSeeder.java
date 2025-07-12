@@ -96,18 +96,15 @@ public class DataSeeder implements CommandLineRunner {
                     .paymentLink("https://payment.example.com/checkout/ORDER-123456")
                     .paymentStatus(PaymentOrder.PaymentStatus.SUCCESS)
                     .paymentMethod(PaymentOrder.PaymentMethod.BANK)
+                    .bin("970415")
+                    .accountName("NGUYEN THI HUONG")
+                    .accountNumber("0386331971")
+                    .qrCode("00020101021138540010A00000072701240006970415011003863319710208QRIBFTTA53037045802VN63046733")
                     .build();
 
-            PaymentOrder order2 = PaymentOrder.builder()
-                    .user(userRepository.findById(1L).orElse(null))
-                    .subscriptionPackage(subscriptionPackageRepository.findById(2L).orElse(null))
-                    .orderId(1234567)
-                    .paymentLink("https://payment.example.com/checkout/ORDER-78912")
-                    .paymentStatus(PaymentOrder.PaymentStatus.SUCCESS)
-                    .paymentMethod(PaymentOrder.PaymentMethod.BANK)
-                    .build();
 
-            paymentOrderRepository.saveAll(List.of(order1, order2));
+
+            paymentOrderRepository.saveAll(List.of(order1));
         }
 
         if (licenseRepository.count() == 0) {

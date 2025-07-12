@@ -61,19 +61,19 @@ public class PaymentOrderService implements IPaymentOrderService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy gói đăng ký"));
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+        if (repository.existsByOrderId(form.getOrderId())) {
+            throw new RuntimeException("Mã orderId đã tồn tại");
+        }
 
         PaymentOrder order = new PaymentOrder();
         order.setUser(user);
         order.setSubscriptionPackage(subscription);
-
-        // OrderId random and no exist
-        int generatedOrderId;
-        do {
-            generatedOrderId = new Random().nextInt(900_000_000) + 100_000_000;
-        } while (repository.existsByOrderId(generatedOrderId));
-
-        order.setOrderId(generatedOrderId);
-
+        order.setOrderId(form.getOrderId());
+        order.setPaymentLink(form.getPaymentLink());
+        order.setBin(form.getBin());
+        order.setAccountName(form.getAccountName());
+        order.setAccountNumber(form.getAccountNumber());
+        order.setQrCode(form.getQrCode());
         order.setPaymentMethod(form.getPaymentMethod());
         order.setPaymentStatus(PaymentOrder.PaymentStatus.PENDING);
         order.setCreatedAt(LocalDateTime.now());
@@ -136,6 +136,12 @@ public class PaymentOrderService implements IPaymentOrderService {
                 .map(this::toDto)
                 .orElseThrow(() -> new RuntimeException("Payment order not found"));
     }
+    @Override
+    public PaymentOrderDTO getByOrderId(Integer orderId) {
+        return repository.findByOrderId(orderId)
+                .map(this::toDto)
+                .orElseThrow(() -> new RuntimeException("Payment order not found"));
+    }
 
     @Override
     public boolean orderExists(Long id) {
@@ -173,7 +179,7 @@ public class PaymentOrderService implements IPaymentOrderService {
         SubscriptionPackage subscription = entity.getSubscriptionPackage();
         SubscriptionPackageDTO subscriptionDto = null;
 
-        if (Boolean.TRUE.equals(subscription.getIsActive())) {
+//        if (Boolean.TRUE.equals(subscription.getIsActive())) {
             subscriptionDto = SubscriptionPackageDTO.builder()
                     .id(subscription.getId())
                     .name(subscription.getName())
@@ -184,12 +190,16 @@ public class PaymentOrderService implements IPaymentOrderService {
                     .options(subscription.getOptions())
                     .simulatedCount(subscription.getSimulatedCount())
                     .build();
-        }
+//        }
 
         return PaymentOrderDTO.builder()
                 .id(entity.getId())
                 .orderId(entity.getOrderId())
                 .paymentLink(entity.getPaymentLink())
+                .bin(entity.getBin())
+                .accountName(entity.getAccountName())
+                .accountNumber(entity.getAccountNumber())
+                .qrCode(entity.getQrCode())
                 .paymentStatus(entity.getPaymentStatus().name())
                 .paymentMethod(entity.getPaymentMethod().name())
                 .userId(entity.getUser().getId())

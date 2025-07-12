@@ -12,6 +12,10 @@ public class PaymentOrderDTO {
     private Long id;
     private Integer orderId;
     private String paymentLink;
+    private String bin;
+    private String accountName;
+    private String accountNumber;
+    private String qrCode;
     private String paymentStatus;
     private String paymentMethod;
     private Long userId;

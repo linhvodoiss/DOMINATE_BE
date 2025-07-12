@@ -19,6 +19,7 @@ public interface IPaymentOrderService {
     List<PaymentOrderDTO> getAll();
 //    List<PaymentOrderDTO> getByUserId(Long userId);
     PaymentOrderDTO getById(Long id);
+    PaymentOrderDTO getByOrderId(Integer orderId);
     boolean orderExists(Long id);
     boolean orderIdExists(Integer id);
     PaymentOrderDTO create(PaymentOrderDTO dto);

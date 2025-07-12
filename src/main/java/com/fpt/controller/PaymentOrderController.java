@@ -100,6 +100,10 @@ public class PaymentOrderController {
     public PaymentOrderDTO getById(@PathVariable Long id) {
         return service.getById(id);
     }
+    @GetMapping("/order/{id}")
+    public PaymentOrderDTO getByOrderId(@PathVariable Integer id) {
+        return service.getByOrderId(id);
+    }
 
 
 //    @PutMapping("/{id}")
