@@ -70,7 +70,7 @@ public class DataSeeder implements CommandLineRunner {
             List<SubscriptionPackage> packages = Arrays.asList(
                     SubscriptionPackage.builder()
                             .name("Basic Plan")
-                            .price(9.99f)
+                            .price(2000f)
                             .discount(0f)
                             .billingCycle(SubscriptionPackage.BillingCycle.MONTHLY)
                             .isActive(true)
@@ -78,7 +78,7 @@ public class DataSeeder implements CommandLineRunner {
                             .build(),
                     SubscriptionPackage.builder()
                             .name("Pro Plan")
-                            .price(19.99f)
+                            .price(2500f)
                             .discount(10f)
                             .billingCycle(SubscriptionPackage.BillingCycle.MONTHLY)
                             .isActive(true)

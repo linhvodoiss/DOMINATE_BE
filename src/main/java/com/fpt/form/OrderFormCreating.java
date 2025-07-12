@@ -20,8 +20,8 @@ public class OrderFormCreating {
     private String paymentLink;
 
     @NotNull(message = "Không được để trống orderId")
-    @Min(value = 100_000_000, message = "orderId phải có 9 chữ số")
-    @Max(value = 999_999_999, message = "orderId phải có 9 chữ số")
+    @Min(value = 10_000_000, message = "orderId phải có 8-9 chữ số")
+    @Max(value = 999_999_999, message = "orderId phải có 8-9 chữ số")
     private Integer orderId;
     private String bin;
     private String accountName;

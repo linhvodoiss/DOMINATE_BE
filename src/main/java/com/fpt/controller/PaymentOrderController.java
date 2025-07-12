@@ -1,6 +1,7 @@
 package com.fpt.controller;
 
 import com.fpt.annotation.CurrentUserId;
+import com.fpt.dto.PayOSDTO;
 import com.fpt.dto.PaymentOrderDTO;
 import com.fpt.dto.SubscriptionPackageDTO;
 import com.fpt.entity.PaymentOrder;
@@ -96,13 +97,19 @@ public class PaymentOrderController {
         return ResponseEntity.ok(response);
     }
 
+//    @GetMapping("/{id}")
+//    public PaymentOrderDTO getById(@PathVariable Long id) {
+//        return service.getById(id);
+//    }
     @GetMapping("/{id}")
-    public PaymentOrderDTO getById(@PathVariable Long id) {
-        return service.getById(id);
-    }
-    @GetMapping("/order/{id}")
-    public PaymentOrderDTO getByOrderId(@PathVariable Integer id) {
-        return service.getByOrderId(id);
+    public ResponseEntity<SuccessResponse<PaymentOrderDTO>> getByOrderId(@PathVariable Integer id) {
+        PaymentOrderDTO dto = service.getByOrderId(id);
+        SuccessResponse<PaymentOrderDTO> response = new SuccessResponse<>(
+                200,
+                "Lấy thông tin đơn hàng thành công",
+                dto
+        );
+        return ResponseEntity.ok(response);
     }
 
 
