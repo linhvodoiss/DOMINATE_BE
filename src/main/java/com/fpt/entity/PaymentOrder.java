@@ -56,7 +56,7 @@ public class PaymentOrder {
     private LocalDateTime updatedAt;
 
     public enum PaymentStatus {
-        PENDING, SUCCESS, FAILED
+        PENDING,PROCESSING,SUCCESS, FAILED
     }
     public enum PaymentMethod {
         PAYOS, BANK

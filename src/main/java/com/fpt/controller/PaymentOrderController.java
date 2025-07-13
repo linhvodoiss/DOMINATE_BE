@@ -7,7 +7,9 @@ import com.fpt.dto.SubscriptionPackageDTO;
 import com.fpt.entity.PaymentOrder;
 import com.fpt.form.OrderFormCreating;
 import com.fpt.payload.PaginatedResponse;
+import com.fpt.payload.SuccessNoResponse;
 import com.fpt.payload.SuccessResponse;
+import com.fpt.service.IEmailService;
 import com.fpt.service.IPaymentOrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -29,7 +31,7 @@ import java.util.Map;
 public class PaymentOrderController {
 
     private final IPaymentOrderService service;
-
+    private final IEmailService emailService;
 //    @GetMapping
 //    public List<PaymentOrderDTO> getAll() {
 //        return service.getAll();
@@ -59,12 +61,38 @@ public class PaymentOrderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+//    @PatchMapping("/{orderId}")
+//    public ResponseEntity<SuccessResponse<String>> updateOrderStatus(
+//            @PathVariable Long orderId,
+//            @RequestParam String newStatus) {
+//        try {
+//            PaymentOrder updatedOrder = service.changeStatusOrder(orderId, newStatus);
+//            return ResponseEntity.ok(new SuccessResponse<>(
+//                    200,
+//                    "Cập nhật trạng thái thành công",
+//                    updatedOrder.getPaymentStatus().name()
+//            ));
+//        } catch (RuntimeException e) {
+//            return ResponseEntity.badRequest().body(new SuccessResponse<>(
+//                    400,
+//                    e.getMessage(),
+//                    null
+//            ));
+//        } catch (Exception e) {
+//            return ResponseEntity.status(500).body(new SuccessResponse<>(
+//                    500,
+//                    "Lỗi hệ thống",
+//                    null
+//            ));
+//        }
+//    }
+
     @PatchMapping("/{orderId}")
     public ResponseEntity<SuccessResponse<String>> updateOrderStatus(
-            @PathVariable Long orderId,
+            @PathVariable Integer orderId,
             @RequestParam String newStatus) {
         try {
-            PaymentOrder updatedOrder = service.changeStatusOrder(orderId, newStatus);
+            PaymentOrder updatedOrder = service.changeStatusOrderByOrderId(orderId, newStatus);
             return ResponseEntity.ok(new SuccessResponse<>(
                     200,
                     "Cập nhật trạng thái thành công",
@@ -85,7 +113,19 @@ public class PaymentOrderController {
         }
     }
 
+    @PostMapping("/email")
+    public ResponseEntity<SuccessNoResponse> sendConfirmationEmail(
+            @RequestParam("packageId") Long packageId,
+            @RequestParam("orderId") Integer orderId,
+            @RequestParam("email") String email
+    ) {
+        emailService.sendEmailForConfirmOrder(email, packageId, orderId);
+        return ResponseEntity.ok(new SuccessNoResponse(
+                200,
+                "Confirmation email sent to " + email
 
+        ));
+    }
 
 
     @GetMapping("/user/{userId}")
