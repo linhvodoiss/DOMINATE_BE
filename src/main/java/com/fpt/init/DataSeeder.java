@@ -96,6 +96,7 @@ public class DataSeeder implements CommandLineRunner {
                     .paymentLink("https://payment.example.com/checkout/ORDER-123456")
                     .paymentStatus(PaymentOrder.PaymentStatus.SUCCESS)
                     .paymentMethod(PaymentOrder.PaymentMethod.BANK)
+                    .licenseCreated(false)
                     .bin("970415")
                     .accountName("NGUYEN THI HUONG")
                     .accountNumber("0386331971")

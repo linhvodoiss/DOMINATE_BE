@@ -18,6 +18,7 @@ public class PaymentOrderDTO {
     private String qrCode;
     private String paymentStatus;
     private String paymentMethod;
+    private Boolean licenseCreated;
     private Long userId;
     private Long subscriptionId;
     private LocalDateTime createdAt;

@@ -202,6 +202,7 @@ public class PaymentOrderService implements IPaymentOrderService {
                 .qrCode(entity.getQrCode())
                 .paymentStatus(entity.getPaymentStatus().name())
                 .paymentMethod(entity.getPaymentMethod().name())
+                .licenseCreated(entity.getLicenseCreated())
                 .userId(entity.getUser().getId())
                 .subscriptionId(entity.getSubscriptionPackage().getId())
                 .createdAt(entity.getCreatedAt())

@@ -27,16 +27,21 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Supplier;
+import java.util.logging.Logger;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class LicenseService implements ILicenseService {
 
+    private static final Logger LOGGER = Logger.getLogger(LicenseService.class.getName());
+
     private final LicenseRepository licenseRepository;
     private final PaymentOrderRepository paymentOrderRepository;
     private final UserRepository userRepository;
     private final SubscriptionPackageRepository subscriptionRepository;
+    private final IPaymentOrderService paymentOrderService;
     @Autowired
     private ModelMapper modelMapper;
 
@@ -85,12 +90,16 @@ public class LicenseService implements ILicenseService {
 
     @Override
     public LicenseDTO createLicense(LicenseCreateForm form) {
-        PaymentOrder order = paymentOrderRepository.findById(form.getOrderId())
+        PaymentOrder order = paymentOrderRepository.findByOrderId(form.getOrderId())
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn hàng"));
 
         if (order.getPaymentStatus() != PaymentOrder.PaymentStatus.SUCCESS) {
             throw new IllegalArgumentException("Đơn hàng chưa được thanh toán");
         }
+        if (Boolean.TRUE.equals(order.getLicenseCreated())) {
+            throw new IllegalArgumentException("License đã được tạo cho đơn hàng này");
+        }
+
         SubscriptionPackage subscription = order.getSubscriptionPackage();
         int durationDays = switch (subscription.getBillingCycle()) {
             case MONTHLY -> 30;
@@ -110,7 +119,7 @@ public class LicenseService implements ILicenseService {
         license.setUser(order.getUser());
         license.setSubscriptionPackage(subscription);
         license.setCanUsed(!hasActiveLicense);
-
+        order.setLicenseCreated(true);
         License saved = licenseRepository.save(license);
         return toDtoWithSubscription(saved);
     }

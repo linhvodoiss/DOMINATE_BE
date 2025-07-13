@@ -47,7 +47,8 @@ public class PaymentOrder {
 
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod = PaymentMethod.BANK;
-
+    @Column(name = "license_created")
+    private Boolean licenseCreated = false;
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
