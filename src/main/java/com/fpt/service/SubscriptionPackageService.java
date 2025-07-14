@@ -1,9 +1,12 @@
 package com.fpt.service;
 
+import com.fpt.dto.OptionDTO;
 import com.fpt.dto.SubscriptionPackageDTO;
 import com.fpt.dto.UserListDTO;
+import com.fpt.entity.Option;
 import com.fpt.entity.SubscriptionPackage;
 import com.fpt.entity.User;
+import com.fpt.repository.OptionRepository;
 import com.fpt.repository.SubscriptionPackageRepository;
 import com.fpt.specification.SubscriptionPackageSpecificationBuilder;
 import com.fpt.specification.UserSpecificationBuilder;
@@ -17,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +29,7 @@ import java.util.List;
 public class SubscriptionPackageService implements ISubscriptionPackageService {
 
     private final SubscriptionPackageRepository repository;
+    private final OptionRepository optionRepository;
 @Autowired
 private ModelMapper modelMapper;
     @Override
@@ -64,10 +70,10 @@ private ModelMapper modelMapper;
                 .orElseThrow(() -> new RuntimeException("Subscription not found"));
     }
 
-    @Override
-    public SubscriptionPackageDTO create(SubscriptionPackageDTO dto) {
-        return toDto(repository.save(toEntity(dto)));
-    }
+
+//    public SubscriptionPackageDTO create(SubscriptionPackageDTO dto) {
+//        return toDto(repository.save(toEntity(dto)));
+//    }
 
     @Override
     public SubscriptionPackageDTO update(Long id, SubscriptionPackageDTO dto) {
@@ -79,7 +85,7 @@ private ModelMapper modelMapper;
         entity.setDiscount(dto.getDiscount());
         entity.setBillingCycle(SubscriptionPackage.BillingCycle.valueOf(dto.getBillingCycle()));
         entity.setIsActive(dto.getIsActive());
-        entity.setOptions(dto.getOptions());
+//        entity.setOptions(dto.getOptions());
         entity.setSimulatedCount(dto.getSimulatedCount());
 
         return toDto(repository.save(entity));
@@ -104,6 +110,13 @@ private ModelMapper modelMapper;
 
 
     private SubscriptionPackageDTO toDto(SubscriptionPackage entity) {
+        List<OptionDTO> optionDTOs = entity.getOptions().stream()
+                .map(option -> OptionDTO.builder()
+                        .id(option.getId())
+                        .name(option.getName())
+                        .build())
+                .collect(Collectors.toList());
+
         return SubscriptionPackageDTO.builder()
                 .id(entity.getId())
                 .name(entity.getName())
@@ -111,22 +124,32 @@ private ModelMapper modelMapper;
                 .discount(entity.getDiscount())
                 .billingCycle(entity.getBillingCycle().name())
                 .isActive(entity.getIsActive())
-                .options(entity.getOptions())
+                .options(optionDTOs)
                 .simulatedCount(entity.getSimulatedCount())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .build();
     }
 
-    private SubscriptionPackage toEntity(SubscriptionPackageDTO dto) {
-        return SubscriptionPackage.builder()
-                .name(dto.getName())
-                .price(dto.getPrice())
-                .discount(dto.getDiscount())
-                .billingCycle(SubscriptionPackage.BillingCycle.valueOf(dto.getBillingCycle()))
-                .isActive(dto.getIsActive())
-                .options(dto.getOptions())
-                .simulatedCount(dto.getSimulatedCount())
-                .build();
-    }
+
+
+
+//    private SubscriptionPackage toEntity(SubscriptionPackageDTO dto) {
+//        Set<Option> optionEntities = dto.getOptions()
+//                .stream()
+//                .map(name -> optionRepository.findById(name)
+//                        .orElseThrow(() -> new RuntimeException("Option not found: " + name)))
+//                .collect(Collectors.toSet());
+//
+//        return SubscriptionPackage.builder()
+//                .name(dto.getName())
+//                .price(dto.getPrice())
+//                .discount(dto.getDiscount())
+//                .billingCycle(SubscriptionPackage.BillingCycle.valueOf(dto.getBillingCycle()))
+//                .isActive(dto.getIsActive())
+//                .options(optionEntities)
+//                .simulatedCount(dto.getSimulatedCount())
+//                .build();
+//    }
+
 }

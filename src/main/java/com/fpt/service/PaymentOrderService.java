@@ -1,7 +1,9 @@
 package com.fpt.service;
 
+import com.fpt.dto.OptionDTO;
 import com.fpt.dto.PaymentOrderDTO;
 import com.fpt.dto.SubscriptionPackageDTO;
+import com.fpt.entity.Option;
 import com.fpt.entity.PaymentOrder;
 import com.fpt.entity.SubscriptionPackage;
 import com.fpt.entity.User;
@@ -10,6 +12,7 @@ import com.fpt.repository.PaymentOrderRepository;
 import com.fpt.repository.SubscriptionPackageRepository;
 import com.fpt.repository.UserRepository;
 import com.fpt.specification.PaymentOrderSpecificationBuilder;
+import com.fpt.websocket.PaymentSocketService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +35,8 @@ public class PaymentOrderService implements IPaymentOrderService {
     private final SubscriptionPackageRepository subscriptionRepository;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private PaymentSocketService paymentSocketService;
     @Override
     public Page<PaymentOrderDTO> getAllPackage(Pageable pageable, String search,Long subscriptionId, PaymentOrder.PaymentStatus status) {
         PaymentOrderSpecificationBuilder specification = new PaymentOrderSpecificationBuilder(search,subscriptionId,status);
@@ -105,7 +111,12 @@ public class PaymentOrderService implements IPaymentOrderService {
             PaymentOrder.PaymentStatus status = PaymentOrder.PaymentStatus.valueOf(newStatus);
             order.setPaymentStatus(status);
             order.setUpdatedAt(LocalDateTime.now());
-            return repository.save(order);
+            PaymentOrder savedOrder = repository.save(order);
+
+            // Send Socket
+            paymentSocketService.notifyOrderStatus(orderId, newStatus);
+
+            return savedOrder;
         } catch (IllegalArgumentException e) {
             throw new RuntimeException("Trạng thái không hợp lệ");
         }
@@ -178,8 +189,13 @@ public class PaymentOrderService implements IPaymentOrderService {
     private PaymentOrderDTO toDto(PaymentOrder entity) {
         SubscriptionPackage subscription = entity.getSubscriptionPackage();
         SubscriptionPackageDTO subscriptionDto = null;
-
-//        if (Boolean.TRUE.equals(subscription.getIsActive())) {
+        List<OptionDTO> optionDTOs = subscription.getOptions().stream()
+                .map(option -> OptionDTO.builder()
+                        .id(option.getId())
+                        .name(option.getName())
+                        .build())
+                .toList();
+        if (subscription != null) {
             subscriptionDto = SubscriptionPackageDTO.builder()
                     .id(subscription.getId())
                     .name(subscription.getName())
@@ -187,10 +203,12 @@ public class PaymentOrderService implements IPaymentOrderService {
                     .discount(subscription.getDiscount())
                     .billingCycle(subscription.getBillingCycle().name())
                     .isActive(subscription.getIsActive())
-                    .options(subscription.getOptions())
+                    .options(optionDTOs)
                     .simulatedCount(subscription.getSimulatedCount())
+                    .createdAt(subscription.getCreatedAt())
+                    .updatedAt(subscription.getUpdatedAt())
                     .build();
-//        }
+        }
 
         return PaymentOrderDTO.builder()
                 .id(entity.getId())
@@ -204,7 +222,7 @@ public class PaymentOrderService implements IPaymentOrderService {
                 .paymentMethod(entity.getPaymentMethod().name())
                 .licenseCreated(entity.getLicenseCreated())
                 .userId(entity.getUser().getId())
-                .subscriptionId(entity.getSubscriptionPackage().getId())
+                .subscriptionId(subscription != null ? subscription.getId() : null)
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .subscription(subscriptionDto)
@@ -213,13 +231,21 @@ public class PaymentOrderService implements IPaymentOrderService {
 
 
 
+
     private PaymentOrder toEntity(PaymentOrderDTO dto) {
         return PaymentOrder.builder()
                 .orderId(dto.getOrderId())
                 .paymentLink(dto.getPaymentLink())
                 .paymentStatus(PaymentOrder.PaymentStatus.valueOf(dto.getPaymentStatus()))
+                .paymentMethod(PaymentOrder.PaymentMethod.valueOf(dto.getPaymentMethod()))
+                .licenseCreated(dto.getLicenseCreated())
+                .bin(dto.getBin())
+                .accountName(dto.getAccountName())
+                .accountNumber(dto.getAccountNumber())
+                .qrCode(dto.getQrCode())
                 .user(userRepository.findById(dto.getUserId()).orElseThrow())
                 .subscriptionPackage(subscriptionRepository.findById(dto.getSubscriptionId()).orElseThrow())
                 .build();
     }
+
 }

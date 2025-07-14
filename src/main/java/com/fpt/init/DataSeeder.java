@@ -6,8 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 @Component
 @RequiredArgsConstructor
@@ -20,10 +19,22 @@ public class DataSeeder implements CommandLineRunner {
     private final VersionRepository versionRepository;
     private final CategoryRepository categoryRepository;
     private final DocRepository docRepository;
+    private final OptionRepository optionRepository; // ✅ Add this
 
     @Override
     public void run(String... args) throws Exception {
 
+        // Seed Option table first
+        if (optionRepository.count() == 0) {
+            List<Option> options = Arrays.asList(
+                    Option.builder().name("5 documents per month").build(),
+                    Option.builder().name("Unlimited access").build(),
+                    Option.builder().name("Priority support").build()
+            );
+            optionRepository.saveAll(options);
+        }
+
+        // Seed Users
         if (userRepository.count() == 0) {
             List<User> users = Arrays.asList(
                     User.builder()
@@ -66,26 +77,40 @@ public class DataSeeder implements CommandLineRunner {
             userRepository.saveAll(users);
         }
 
+        // Seed Subscription Packages with options
         if (subscriptionPackageRepository.count() == 0) {
-            List<SubscriptionPackage> packages = Arrays.asList(
-                    SubscriptionPackage.builder()
-                            .name("Basic Plan")
-                            .price(2000f)
-                            .discount(0f)
-                            .billingCycle(SubscriptionPackage.BillingCycle.MONTHLY)
-                            .isActive(true)
-                            .options("5 documents per month")
-                            .build(),
-                    SubscriptionPackage.builder()
-                            .name("Pro Plan")
-                            .price(2500f)
-                            .discount(10f)
-                            .billingCycle(SubscriptionPackage.BillingCycle.MONTHLY)
-                            .isActive(true)
-                            .options("Unlimited access")
-                            .build()
-            );
-            subscriptionPackageRepository.saveAll(packages);
+            Option option1 = optionRepository.findById(1L).orElseThrow();
+            Option option2 = optionRepository.findById(2L).orElseThrow();
+            Option option3 = optionRepository.findById(3L).orElseThrow();
+
+            // Bước 1: Tạo SubscriptionPackage KHÔNG GÁN option
+            SubscriptionPackage basicPlan = SubscriptionPackage.builder()
+                    .name("Basic Plan")
+                    .price(2000f)
+                    .discount(0f)
+                    .billingCycle(SubscriptionPackage.BillingCycle.MONTHLY)
+                    .isActive(true)
+                    .build();
+
+            SubscriptionPackage proPlan = SubscriptionPackage.builder()
+                    .name("Pro Plan")
+                    .price(2500f)
+                    .discount(10f)
+                    .billingCycle(SubscriptionPackage.BillingCycle.MONTHLY)
+                    .isActive(true)
+                    .build();
+
+            // Lưu lần đầu không có option
+            basicPlan = subscriptionPackageRepository.save(basicPlan);
+            proPlan = subscriptionPackageRepository.save(proPlan);
+
+            // Gán option (sử dụng List thay vì Set)
+            basicPlan.setOptions(List.of(option1));
+            proPlan.setOptions(List.of(option2, option3));
+
+            // Lưu lại sau khi gán option
+            subscriptionPackageRepository.save(basicPlan);
+            subscriptionPackageRepository.save(proPlan);
         }
 
         if (paymentOrderRepository.count() == 0) {
@@ -102,8 +127,6 @@ public class DataSeeder implements CommandLineRunner {
                     .accountNumber("0386331971")
                     .qrCode("00020101021138540010A00000072701240006970415011003863319710208QRIBFTTA53037045802VN63046733")
                     .build();
-
-
 
             paymentOrderRepository.saveAll(List.of(order1));
         }

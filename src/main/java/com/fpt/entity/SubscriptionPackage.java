@@ -5,6 +5,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "SubscriptionPackage")
@@ -30,7 +32,13 @@ public class SubscriptionPackage {
 
     private Boolean isActive = true;
 
-    private String options;
+    @ManyToMany
+    @JoinTable(
+            name = "subscription_package_option",
+            joinColumns = @JoinColumn(name = "subscription_package_id"),
+            inverseJoinColumns = @JoinColumn(name = "option_id")
+    )
+    private List<Option> options;
 
     private Long simulatedCount;
     @CreationTimestamp

@@ -13,7 +13,7 @@ public interface ISubscriptionPackageService {
     List<SubscriptionPackageDTO> convertToDto(List<SubscriptionPackage> data);
     List<SubscriptionPackageDTO> getAll();
     SubscriptionPackageDTO getById(Long id);
-    SubscriptionPackageDTO create(SubscriptionPackageDTO dto);
+//    SubscriptionPackageDTO create(SubscriptionPackageDTO dto);
     SubscriptionPackageDTO update(Long id, SubscriptionPackageDTO dto);
     void delete(Long id);
     void deleteMore(List<Long> ids);

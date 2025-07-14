@@ -66,10 +66,10 @@ public class SubscriptionPackageController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping
-    public SubscriptionPackageDTO create(@RequestBody SubscriptionPackageDTO dto) {
-        return service.create(dto);
-    }
+//    @PostMapping
+//    public SubscriptionPackageDTO create(@RequestBody SubscriptionPackageDTO dto) {
+//        return service.create(dto);
+//    }
 
     @PutMapping("/{id}")
     public SubscriptionPackageDTO update(@PathVariable Long id, @RequestBody SubscriptionPackageDTO dto) {
