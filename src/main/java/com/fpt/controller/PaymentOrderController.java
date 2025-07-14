@@ -56,36 +56,10 @@ public class PaymentOrderController {
             @RequestBody @Valid OrderFormCreating form
 
     ) {;
-        PaymentOrder order = service.createOrder(form, userId);
-        SuccessResponse<PaymentOrder> response = new SuccessResponse<>(201, "Tạo đơn hàng thành công", order);
+        PaymentOrderDTO order = service.createOrder(form, userId);
+        SuccessResponse<PaymentOrderDTO> response = new SuccessResponse<>(201, "Tạo đơn hàng thành công", order);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
-
-//    @PatchMapping("/{orderId}")
-//    public ResponseEntity<SuccessResponse<String>> updateOrderStatus(
-//            @PathVariable Long orderId,
-//            @RequestParam String newStatus) {
-//        try {
-//            PaymentOrder updatedOrder = service.changeStatusOrder(orderId, newStatus);
-//            return ResponseEntity.ok(new SuccessResponse<>(
-//                    200,
-//                    "Cập nhật trạng thái thành công",
-//                    updatedOrder.getPaymentStatus().name()
-//            ));
-//        } catch (RuntimeException e) {
-//            return ResponseEntity.badRequest().body(new SuccessResponse<>(
-//                    400,
-//                    e.getMessage(),
-//                    null
-//            ));
-//        } catch (Exception e) {
-//            return ResponseEntity.status(500).body(new SuccessResponse<>(
-//                    500,
-//                    "Lỗi hệ thống",
-//                    null
-//            ));
-//        }
-//    }
 
     @PatchMapping("/{orderId}")
     public ResponseEntity<SuccessResponse<String>> updateOrderStatus(

@@ -13,7 +13,7 @@ public interface IPaymentOrderService {
     Page<PaymentOrderDTO> getAllPackage(Pageable pageable, String search,Long subscriptionId, PaymentOrder.PaymentStatus status);
     Page<PaymentOrderDTO> getUserPackage(Pageable pageable, String search,Long subscriptionId, PaymentOrder.PaymentStatus status, Long userId);
     List<PaymentOrderDTO> convertToDto(List<PaymentOrder> paymentOrders);
-    PaymentOrder createOrder(OrderFormCreating form, Long userId);
+    PaymentOrderDTO createOrder(OrderFormCreating form, Long userId);
     PaymentOrder changeStatusOrder(Long orderId, String newStatus);
     PaymentOrder changeStatusOrderByOrderId(Integer orderId, String newStatus);
     List<PaymentOrderDTO> getAll();

@@ -62,7 +62,7 @@ public class PaymentOrderService implements IPaymentOrderService {
     }
 
     @Override
-    public PaymentOrder createOrder(OrderFormCreating form, Long userId) {
+    public PaymentOrderDTO createOrder(OrderFormCreating form, Long userId) {
         SubscriptionPackage subscription = subscriptionRepository.findById(form.getSubscriptionId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy gói đăng ký"));
         User user = userRepository.findById(userId)
@@ -85,8 +85,12 @@ public class PaymentOrderService implements IPaymentOrderService {
         order.setCreatedAt(LocalDateTime.now());
         order.setUpdatedAt(LocalDateTime.now());
 
-        return repository.save(order);
+        PaymentOrder savedOrder = repository.save(order);
+
+        // ✅ Trả về DTO đã map đúng, không vòng lặp
+        return toDto(savedOrder);
     }
+
 
     @Override
     public PaymentOrder changeStatusOrder(Long orderId, String newStatus) {
@@ -189,13 +193,15 @@ public class PaymentOrderService implements IPaymentOrderService {
     private PaymentOrderDTO toDto(PaymentOrder entity) {
         SubscriptionPackage subscription = entity.getSubscriptionPackage();
         SubscriptionPackageDTO subscriptionDto = null;
-        List<OptionDTO> optionDTOs = subscription.getOptions().stream()
-                .map(option -> OptionDTO.builder()
-                        .id(option.getId())
-                        .name(option.getName())
-                        .build())
-                .toList();
+
         if (subscription != null) {
+            List<OptionDTO> optionDTOs = subscription.getOptions().stream()
+                    .map(option -> OptionDTO.builder()
+                            .id(option.getId())
+                            .name(option.getName())
+                            .build())
+                    .toList();
+
             subscriptionDto = SubscriptionPackageDTO.builder()
                     .id(subscription.getId())
                     .name(subscription.getName())
@@ -203,7 +209,7 @@ public class PaymentOrderService implements IPaymentOrderService {
                     .discount(subscription.getDiscount())
                     .billingCycle(subscription.getBillingCycle().name())
                     .isActive(subscription.getIsActive())
-                    .options(optionDTOs)
+                    .options(optionDTOs) // ✅ optionDTOs không chứa subscriptionPackages
                     .simulatedCount(subscription.getSimulatedCount())
                     .createdAt(subscription.getCreatedAt())
                     .updatedAt(subscription.getUpdatedAt())
