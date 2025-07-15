@@ -119,6 +119,7 @@ public class LicenseService implements ILicenseService {
         license.setUser(order.getUser());
         license.setSubscriptionPackage(subscription);
         license.setCanUsed(!hasActiveLicense);
+        license.setOrderId(form.getOrderId());
         order.setLicenseCreated(true);
         License saved = licenseRepository.save(license);
         return toDtoWithSubscription(saved);
