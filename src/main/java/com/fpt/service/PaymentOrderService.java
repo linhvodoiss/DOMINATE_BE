@@ -86,8 +86,6 @@ public class PaymentOrderService implements IPaymentOrderService {
         order.setUpdatedAt(LocalDateTime.now());
 
         PaymentOrder savedOrder = repository.save(order);
-
-        // ✅ Trả về DTO đã map đúng, không vòng lặp
         return toDto(savedOrder);
     }
 
@@ -208,6 +206,7 @@ public class PaymentOrderService implements IPaymentOrderService {
                     .price(subscription.getPrice())
                     .discount(subscription.getDiscount())
                     .billingCycle(subscription.getBillingCycle().name())
+                    .typePackage(subscription.getTypePackage().name())
                     .isActive(subscription.getIsActive())
                     .options(optionDTOs) // ✅ optionDTOs không chứa subscriptionPackages
                     .simulatedCount(subscription.getSimulatedCount())

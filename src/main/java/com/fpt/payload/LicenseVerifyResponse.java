@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 public class LicenseVerifyResponse {
     private boolean valid;
     private int code;
+    private String type;
     private String message;
     private LocalDateTime expiresAt;
 }

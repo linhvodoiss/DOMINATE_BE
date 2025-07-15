@@ -3,6 +3,7 @@ package com.fpt.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fpt.entity.Option;
+import com.fpt.entity.SubscriptionPackage;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -20,6 +21,7 @@ public class SubscriptionPackageDTO {
     private Float price;
     private Float discount;
     private String billingCycle;
+    private String typePackage;
     private Boolean isActive;
     private List<OptionDTO> options;
     private Long simulatedCount;

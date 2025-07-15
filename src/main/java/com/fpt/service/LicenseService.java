@@ -7,6 +7,8 @@ import com.fpt.entity.License;
 import com.fpt.entity.PaymentOrder;
 import com.fpt.entity.SubscriptionPackage;
 import com.fpt.form.LicenseCreateForm;
+import com.fpt.form.LicenseVerifyRequestForm;
+import com.fpt.payload.LicenseVerifyResponse;
 import com.fpt.repository.LicenseRepository;
 import com.fpt.repository.PaymentOrderRepository;
 import com.fpt.repository.SubscriptionPackageRepository;
@@ -23,10 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 
@@ -103,6 +102,7 @@ public class LicenseService implements ILicenseService {
         SubscriptionPackage subscription = order.getSubscriptionPackage();
         int durationDays = switch (subscription.getBillingCycle()) {
             case MONTHLY -> 30;
+            case HALF_YEARLY -> 182;
             case YEARLY -> 365;
             default -> throw new IllegalStateException("BillingCycle không hợp lệ");
         };
@@ -163,7 +163,58 @@ public class LicenseService implements ILicenseService {
         return toDtoWithSubscription(toActivate);
     }
 
+    public LicenseVerifyResponse verifyLicense(LicenseVerifyRequestForm request) {
+        Optional<License> licenseOpt = licenseRepository.findByLicenseKey(request.getLicenseKey());
 
+        if (licenseOpt.isEmpty()) {
+            return new LicenseVerifyResponse(false, 404, null, "License không tồn tại", null);
+        }
+
+        License license = licenseOpt.get();
+
+        if (!Boolean.TRUE.equals(license.getCanUsed())) {
+            return new LicenseVerifyResponse(false, 401, null, "License chưa được kích hoạt", null);
+        }
+
+        if (!license.getHardwareId().equals(request.getHardwareId())) {
+            return new LicenseVerifyResponse(false, 403, null, "License không hợp lệ với thiết bị này", null);
+        }
+
+        LocalDateTime expiredAt = license.getCreatedAt().plusDays(license.getDuration());
+        if (expiredAt.isBefore(LocalDateTime.now())) {
+            return new LicenseVerifyResponse(false, 400, null, "License đã hết hạn", expiredAt);
+        }
+
+        SubscriptionPackage.TypePackage type = license.getSubscriptionPackage().getTypePackage();
+        return new LicenseVerifyResponse(true, 200, type.toString(), "License hợp lệ", expiredAt);
+    }
+
+    public LicenseVerifyResponse verifyLicensePro(LicenseVerifyRequestForm request) {
+        Optional<License> licenseOpt = licenseRepository.findByLicenseKey(request.getLicenseKey());
+
+        if (licenseOpt.isEmpty()) {
+            return new LicenseVerifyResponse(false, 404, null, "License không tồn tại", null);
+        }
+
+        License license = licenseOpt.get();
+
+        if (!Boolean.TRUE.equals(license.getCanUsed())) {
+            return new LicenseVerifyResponse(false, 401, null, "License chưa được kích hoạt", null);
+        }
+
+        if (!license.getUser().getId().equals(request.getUserId())) {
+            return new LicenseVerifyResponse(false, 403, null, "License không hợp lệ với người dùng này", null);
+        }
+
+        LocalDateTime expiredAt = license.getCreatedAt().plusDays(license.getDuration());
+        if (expiredAt.isBefore(LocalDateTime.now())) {
+            return new LicenseVerifyResponse(false, 400, null, "License đã hết hạn", expiredAt);
+        }
+
+        SubscriptionPackage.TypePackage type = license.getSubscriptionPackage().getTypePackage();
+
+        return new LicenseVerifyResponse(true, 200, type.toString(), "License hợp lệ", expiredAt);
+    }
 
 
 

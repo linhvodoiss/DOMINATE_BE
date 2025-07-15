@@ -83,35 +83,49 @@ public class DataSeeder implements CommandLineRunner {
             Option option2 = optionRepository.findById(2L).orElseThrow();
             Option option3 = optionRepository.findById(3L).orElseThrow();
 
-            // Bước 1: Tạo SubscriptionPackage KHÔNG GÁN option
-            SubscriptionPackage basicPlan = SubscriptionPackage.builder()
-                    .name("Basic Plan")
-                    .price(2000f)
-                    .discount(0f)
-                    .billingCycle(SubscriptionPackage.BillingCycle.MONTHLY)
-                    .isActive(true)
-                    .build();
+            List<SubscriptionPackage> packagesToSave = new ArrayList<>();
 
-            SubscriptionPackage proPlan = SubscriptionPackage.builder()
-                    .name("Pro Plan")
-                    .price(2500f)
-                    .discount(10f)
-                    .billingCycle(SubscriptionPackage.BillingCycle.MONTHLY)
-                    .isActive(true)
-                    .build();
+            for (SubscriptionPackage.BillingCycle cycle : SubscriptionPackage.BillingCycle.values()) {
+                // RUNTIME package
+                SubscriptionPackage runtimePackage = SubscriptionPackage.builder()
+                        .name("Runtime Package - " + cycle.name())
+                        .price(getFixedPrice(cycle))
+                        .discount(0f)
+                        .billingCycle(cycle)
+                        .typePackage(SubscriptionPackage.TypePackage.RUNTIME)
+                        .isActive(true)
+                        .build();
+                packagesToSave.add(runtimePackage);
 
-            // Lưu lần đầu không có option
-            basicPlan = subscriptionPackageRepository.save(basicPlan);
-            proPlan = subscriptionPackageRepository.save(proPlan);
+                // DEV package
+                SubscriptionPackage devPackage = SubscriptionPackage.builder()
+                        .name("Dev Package - " + cycle.name())
+                        .price(getFixedPrice(cycle))
+                        .discount(10f)
+                        .billingCycle(cycle)
+                        .typePackage(SubscriptionPackage.TypePackage.DEV)
+                        .isActive(true)
+                        .build();
+                packagesToSave.add(devPackage);
+            }
 
-            // Gán option (sử dụng List thay vì Set)
-            basicPlan.setOptions(List.of(option1));
-            proPlan.setOptions(List.of(option2, option3));
+            // Lưu lần đầu
+            subscriptionPackageRepository.saveAll(packagesToSave);
+
+            // Gán option
+            for (SubscriptionPackage pkg : packagesToSave) {
+                if (pkg.getTypePackage() == SubscriptionPackage.TypePackage.RUNTIME) {
+                    pkg.setOptions(List.of(option1));
+                } else {
+                    pkg.setOptions(List.of(option2, option3));
+                }
+            }
 
             // Lưu lại sau khi gán option
-            subscriptionPackageRepository.save(basicPlan);
-            subscriptionPackageRepository.save(proPlan);
+            subscriptionPackageRepository.saveAll(packagesToSave);
         }
+
+
 
         if (paymentOrderRepository.count() == 0) {
             PaymentOrder order1 = PaymentOrder.builder()
@@ -169,5 +183,12 @@ public class DataSeeder implements CommandLineRunner {
             );
             docRepository.saveAll(docs);
         }
+    }
+    private  float getFixedPrice(SubscriptionPackage.BillingCycle cycle) {
+        return switch (cycle) {
+            case MONTHLY -> 2000f;
+            case HALF_YEARLY -> 2500f;
+            case YEARLY -> 3000f;
+        };
     }
 }

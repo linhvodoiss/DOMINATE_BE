@@ -30,6 +30,9 @@ public class SubscriptionPackage {
     @Enumerated(EnumType.STRING)
     private BillingCycle billingCycle;
 
+    @Enumerated(EnumType.STRING)
+    private TypePackage typePackage;
+
     private Boolean isActive = true;
 
     @ManyToMany
@@ -49,6 +52,11 @@ public class SubscriptionPackage {
     private LocalDateTime updatedAt;
 
     public enum BillingCycle {
-        MONTHLY, YEARLY
+        MONTHLY,
+        HALF_YEARLY,
+        YEARLY
+    }
+    public enum TypePackage {
+        DEV, RUNTIME
     }
 }

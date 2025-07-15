@@ -6,6 +6,8 @@ import com.fpt.dto.UserLicenseViewDTO;
 import com.fpt.entity.License;
 import com.fpt.entity.PaymentOrder;
 import com.fpt.form.LicenseCreateForm;
+import com.fpt.form.LicenseVerifyRequestForm;
+import com.fpt.payload.LicenseVerifyResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -21,6 +23,8 @@ public interface ILicenseService {
     LicenseDTO create(LicenseDTO dto);
     LicenseDTO createLicense(LicenseCreateForm form);
     LicenseDTO activateNextLicense(Long userId);
+    LicenseVerifyResponse verifyLicense(LicenseVerifyRequestForm request);
+    LicenseVerifyResponse verifyLicensePro(LicenseVerifyRequestForm request);
     LicenseDTO update(Long id, LicenseDTO dto);
     void delete(Long id);
     List<LicenseDTO> getByUserId(Long userId);

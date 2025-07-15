@@ -123,6 +123,7 @@ private ModelMapper modelMapper;
                 .price(entity.getPrice())
                 .discount(entity.getDiscount())
                 .billingCycle(entity.getBillingCycle().name())
+                .typePackage(entity.getTypePackage().name())
                 .isActive(entity.getIsActive())
                 .options(optionDTOs)
                 .simulatedCount(entity.getSimulatedCount())
