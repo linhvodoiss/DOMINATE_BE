@@ -74,9 +74,12 @@ public ResponseEntity<PaginatedResponse<LicenseDTO>> getAllOrders(
     }
 
     @PostMapping("/activate-next/{userId}")
-    public ResponseEntity<?> activateNextLicense(@PathVariable Long userId) {
+    public ResponseEntity<?> activateNextLicense(
+            @PathVariable Long userId,
+            @RequestParam SubscriptionPackage.TypePackage type
+    ) {
         try {
-            LicenseDTO dto = service.activateNextLicense(userId);
+            LicenseDTO dto = service.activateNextLicense(userId, type);
             return ResponseEntity.ok(dto);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("code", 400, "message", e.getMessage()));
@@ -84,6 +87,7 @@ public ResponseEntity<PaginatedResponse<LicenseDTO>> getAllOrders(
             return ResponseEntity.status(500).body(Map.of("code", 500, "message", "Có lỗi xảy ra"));
         }
     }
+
 
 
 

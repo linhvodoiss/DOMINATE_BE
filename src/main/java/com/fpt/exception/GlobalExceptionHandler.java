@@ -27,7 +27,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<SuccessResponse<Object>> handleAllExceptions(Exception ex) {
         ex.printStackTrace();
 
-        SuccessResponse<Object> response = new SuccessResponse<>(500, "Lỗi hệ thống: " + ex.getMessage(), null);
+        SuccessResponse<Object> response = new SuccessResponse<>(500, "Lỗi hệ thống.", null);
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

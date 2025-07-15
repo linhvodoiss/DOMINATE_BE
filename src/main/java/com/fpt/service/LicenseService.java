@@ -125,43 +125,45 @@ public class LicenseService implements ILicenseService {
     }
 
     @Override
-    public LicenseDTO activateNextLicense(Long userId) {
-        List<License> userLicenses = licenseRepository.findByUserId(userId);
+    public LicenseDTO activateNextLicense(Long userId, SubscriptionPackage.TypePackage type) {
+        List<License> userLicenses = licenseRepository.findByUserId(userId)
+                .stream()
+                .filter(l -> l.getSubscriptionPackage().getTypePackage() == type)
+                .toList();
+
         LocalDateTime now = LocalDateTime.now();
 
-        // B1: Tìm key đang sử dụng hiện tại (canUsed = true)
+        // B1: Tìm key đang dùng hiện tại của loại này
         userLicenses.stream()
                 .filter(l -> Boolean.TRUE.equals(l.getCanUsed()))
                 .findFirst()
                 .ifPresent(currentUsed -> {
-                    // Nếu vẫn còn hạn thì không cho active mới
                     if (currentUsed.getCreatedAt().plusDays(currentUsed.getDuration()).isAfter(now)) {
-                        throw new IllegalArgumentException("Key hiện tại vẫn còn hạn sử dụng");
+                        throw new IllegalArgumentException("Key " + type + " hiện tại vẫn còn hạn sử dụng");
                     }
-
-                    // Nếu đã hết hạn thì set lại canUsed = false
                     currentUsed.setCanUsed(false);
                     licenseRepository.save(currentUsed);
                 });
 
-        // B2: Tìm key chưa dùng (canUsed = false) và còn hạn
+        // B2: Tìm key chưa dùng, còn hạn
         List<License> validUnusedLicenses = userLicenses.stream()
                 .filter(l -> Boolean.FALSE.equals(l.getCanUsed()))
                 .filter(l -> l.getCreatedAt().plusDays(l.getDuration()).isAfter(now))
-                .sorted(Comparator.comparing(License::getCreatedAt)) // Lấy key cũ nhất
+                .sorted(Comparator.comparing(License::getCreatedAt))
                 .toList();
 
         if (validUnusedLicenses.isEmpty()) {
-            throw new IllegalArgumentException("Không còn key nào còn hạn để sử dụng");
+            throw new IllegalArgumentException("Không còn key nào thuộc loại " + type + " còn hạn để sử dụng");
         }
 
-        // B3: Kích hoạt key mới
+        // B3: Kích hoạt
         License toActivate = validUnusedLicenses.get(0);
         toActivate.setCanUsed(true);
         licenseRepository.save(toActivate);
 
         return toDtoWithSubscription(toActivate);
     }
+
 
     public LicenseVerifyResponse verifyLicense(LicenseVerifyRequestForm request) {
         Optional<License> licenseOpt = licenseRepository.findByLicenseKey(request.getLicenseKey());
