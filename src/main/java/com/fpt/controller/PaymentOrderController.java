@@ -88,15 +88,29 @@ public class PaymentOrderController {
     }
 
     @PostMapping("/email")
-    public ResponseEntity<SuccessNoResponse> sendConfirmationEmail(
+    public ResponseEntity<SuccessNoResponse> sendEmailCustomer(
             @RequestParam("packageId") Long packageId,
             @RequestParam("orderId") Integer orderId,
             @RequestParam("email") String email
     ) {
-        emailService.sendEmailForConfirmOrder(email, packageId, orderId);
+        emailService.sendEmailForCustomer(email, packageId, orderId);
         return ResponseEntity.ok(new SuccessNoResponse(
                 200,
-                "Confirmation email sent to " + email
+                "Your order have been received, waiting for confirmation"
+
+        ));
+    }
+
+    @PostMapping("/emailAdmin")
+    public ResponseEntity<SuccessNoResponse> sendEmailAdmin(
+            @RequestParam("packageId") Long packageId,
+            @RequestParam("orderId") Integer orderId,
+            @RequestParam("email") String email
+    ) {
+        emailService.sendEmailForNotificationAdmin(email, packageId, orderId);
+        return ResponseEntity.ok(new SuccessNoResponse(
+                200,
+                "Email have send."
 
         ));
     }

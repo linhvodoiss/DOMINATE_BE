@@ -5,5 +5,6 @@ public interface IEmailService {
 	void sendRegistrationUserConfirm(String email);
 
 	void sendResetPassword(String email);
-	void sendEmailForConfirmOrder(String email, Long packageId, Integer orderId);
+	void sendEmailForCustomer(String email, Long packageId, Integer orderId);
+	void sendEmailForNotificationAdmin(String email, Long packageId, Integer orderId);
 }

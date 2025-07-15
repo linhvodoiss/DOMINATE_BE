@@ -61,8 +61,9 @@ public class EmailService implements IEmailService {
 
 		sendEmail(email, subject, content);
 	}
+
 	@Override
-	public void sendEmailForConfirmOrder(String email, Long packageId, Integer orderId) {
+	public void sendEmailForCustomer(String email, Long packageId, Integer orderId) {
 		User user = userService.findUserByEmail(email);
 
 		if (user == null) {
@@ -73,12 +74,27 @@ public class EmailService implements IEmailService {
 
 		String subject = "Confirm Your Payment";
 		String content = "<p>Hello " + user.getFirstName() + ",</p>"
-				+ "<p>Thank you for your order. Please <a href=\"" + confirmationUrl + "\">click here to confirm or view your payment</a>.</p>"
+				+ "<p>Thank you for your order. Please <a href=\"" + confirmationUrl + "\">click here to view your payment</a>.</p>"
 				+ "<p>If you did not make this order, please ignore this email.</p>"
 				+ "<p>Best regards,<br/>DOMINATE Team</p>";
 
 		sendEmail(email, subject, content);
 	}
+
+	@Override
+	public void sendEmailForNotificationAdmin(String email, Long packageId, Integer orderId) {
+
+		String confirmationUrl = frontendUrl +"/orders/" + packageId + "?orderId=" + orderId;
+
+		String subject = "Confirm Your Payment";
+		String content = "<p>Hello " + ",</p>"
+				+ "<p>DOMINATE have an new order. Please <a href=\"" + confirmationUrl + "\">click here to confirm </a>.</p>";
+
+
+		sendEmail(email, subject, content);
+	}
+
+
 
 
 
