@@ -146,6 +146,8 @@ public class DataSeeder implements CommandLineRunner {
         }
 
         if (licenseRepository.count() == 0) {
+            PaymentOrder paymentOrder = paymentOrderRepository.findByOrderId(123456).orElse(null);
+
             License license = License.builder()
                     .user(userRepository.findById(1L).orElse(null))
                     .subscriptionPackage(subscriptionPackageRepository.findById(2L).orElse(null))
@@ -154,7 +156,9 @@ public class DataSeeder implements CommandLineRunner {
                     .ip("203.113.78.9")
                     .hardwareId("203.113.78.9")
                     .canUsed(false)
+                    .orderId(paymentOrder != null ? paymentOrder.getOrderId() : null)
                     .build();
+
             licenseRepository.save(license);
         }
 

@@ -1,13 +1,12 @@
 package com.fpt.service;
 
+import com.fpt.dto.LicenseDTO;
 import com.fpt.dto.OptionDTO;
 import com.fpt.dto.PaymentOrderDTO;
 import com.fpt.dto.SubscriptionPackageDTO;
-import com.fpt.entity.Option;
-import com.fpt.entity.PaymentOrder;
-import com.fpt.entity.SubscriptionPackage;
-import com.fpt.entity.User;
+import com.fpt.entity.*;
 import com.fpt.form.OrderFormCreating;
+import com.fpt.repository.LicenseRepository;
 import com.fpt.repository.PaymentOrderRepository;
 import com.fpt.repository.SubscriptionPackageRepository;
 import com.fpt.repository.UserRepository;
@@ -21,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -32,6 +32,8 @@ public class PaymentOrderService implements IPaymentOrderService {
 
     private final PaymentOrderRepository repository;
     private final UserRepository userRepository;
+    private final LicenseRepository licenseRepository;
+
     private final SubscriptionPackageRepository subscriptionRepository;
     @Autowired
     private ModelMapper modelMapper;
@@ -40,15 +42,15 @@ public class PaymentOrderService implements IPaymentOrderService {
     @Override
     public Page<PaymentOrderDTO> getAllPackage(Pageable pageable, String search,Long subscriptionId, PaymentOrder.PaymentStatus status) {
         PaymentOrderSpecificationBuilder specification = new PaymentOrderSpecificationBuilder(search,subscriptionId,status);
-        return repository.findAll(specification.build(), pageable)
-                .map(subscription -> modelMapper.map(subscription, PaymentOrderDTO.class));
+        return repository.findAll(specification.build(), pageable).map(this::toDto);
+//                .map(subscription -> modelMapper.map(subscription, PaymentOrderDTO.class));
     }
 
     @Override
     public Page<PaymentOrderDTO> getUserPackage(Pageable pageable, String search, Long subscriptionId, PaymentOrder.PaymentStatus status, Long userId) {
         PaymentOrderSpecificationBuilder specification = new PaymentOrderSpecificationBuilder(search,subscriptionId,status,userId);
-        return repository.findAll(specification.build(), pageable)
-                .map(subscription -> modelMapper.map(subscription, PaymentOrderDTO.class));
+        return repository.findAll(specification.build(), pageable).map(this::toDto);
+//                .map(subscription -> modelMapper.map(subscription, PaymentOrderDTO.class));
     }
 
     @Override
@@ -214,7 +216,39 @@ public class PaymentOrderService implements IPaymentOrderService {
                     .updatedAt(subscription.getUpdatedAt())
                     .build();
         }
+        LicenseDTO licenseDto = null;
+        Optional<License> licenseOpt = licenseRepository.findByOrderId(entity.getOrderId());
 
+        if (licenseOpt.isPresent()) {
+            License license = licenseOpt.get();
+            boolean isExpired;
+            int daysLeft;
+
+            if (Boolean.FALSE.equals(license.getCanUsed())) {
+                isExpired = false;
+                daysLeft = license.getDuration();
+            } else {
+                LocalDateTime now = LocalDateTime.now();
+                LocalDateTime expiryDate = license.getCreatedAt().plusDays(license.getDuration());
+                isExpired = now.isAfter(expiryDate);
+                daysLeft = isExpired ? 0 : (int) Duration.between(now, expiryDate).toDays();
+            }
+            licenseDto = LicenseDTO.builder()
+                    .id(license.getId())
+                    .orderId(license.getOrderId())
+                    .licenseKey(license.getLicenseKey())
+                    .duration(license.getDuration())
+                    .ip(license.getIp())
+                    .hardwareId(license.getHardwareId())
+                    .isExpired(isExpired)
+                    .daysLeft(daysLeft)
+                    .canUsed(license.getCanUsed())
+                    .userId(license.getUser().getId())
+                    .subscriptionId(license.getSubscriptionPackage().getId())
+                    .createdAt(license.getCreatedAt())
+                    .updatedAt(license.getUpdatedAt())
+                    .build();
+        }
         return PaymentOrderDTO.builder()
                 .id(entity.getId())
                 .orderId(entity.getOrderId())
@@ -231,6 +265,7 @@ public class PaymentOrderService implements IPaymentOrderService {
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .subscription(subscriptionDto)
+                .license(licenseDto)
                 .build();
     }
 

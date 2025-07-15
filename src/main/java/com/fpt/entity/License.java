@@ -25,7 +25,7 @@ public class License {
     @ManyToOne
     @JoinColumn(name = "subscription_id", nullable = false)
     private SubscriptionPackage subscriptionPackage;
-
+    private Integer orderId;
     @Column(length = 36, unique = true, nullable = false)
     private String licenseKey;
 

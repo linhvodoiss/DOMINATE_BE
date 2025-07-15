@@ -21,6 +21,7 @@ public class PaymentOrderDTO {
     private Boolean licenseCreated;
     private Long userId;
     private Long subscriptionId;
+    private LicenseDTO license;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private SubscriptionPackageDTO subscription;

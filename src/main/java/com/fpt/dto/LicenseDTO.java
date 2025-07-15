@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @Builder
 public class LicenseDTO {
     private Long id;
+    private Integer orderId;
     private String licenseKey;
     private Integer duration;
     private String ip;

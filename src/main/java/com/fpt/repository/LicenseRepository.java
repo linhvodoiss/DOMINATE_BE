@@ -15,6 +15,7 @@ public interface LicenseRepository extends JpaRepository<License, Long>, JpaSpec
     List<License> findByUserId(Long userId);
     Optional<License> findByLicenseKey(String licenseKey);
     boolean existsByUserIdAndCanUsedTrue(Long userId);
+    Optional<License> findByOrderId(Integer orderId);
     Optional<License> findTopByUserIdAndCanUsedOrderByCreatedAtDesc(Long userId, boolean canUsed);
     Optional<License> findTopByUserIdAndCanUsedOrderByCreatedAtAsc(Long userId, boolean canUsed);
 
