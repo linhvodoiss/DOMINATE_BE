@@ -22,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -64,9 +65,15 @@ public ResponseEntity<PaginatedResponse<LicenseDTO>> getAllOrders(
     }
 
     @PostMapping("/create")
-    public ResponseEntity<?> createLicense(@RequestBody LicenseCreateForm form) {
+    public ResponseEntity<?> createLicense(@RequestBody LicenseCreateForm form, HttpServletRequest request) {
         try {
-            LicenseDTO license = service.createLicense(form);
+
+            String ip = request.getHeader("X-Forwarded-For");
+            if (ip == null || ip.isBlank()) {
+                ip = request.getRemoteAddr();
+            }
+
+            LicenseDTO license = service.createLicense(form, ip);
             return ResponseEntity.ok(new SuccessResponse<>(200, "Tạo license thành công", license));
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest().body(new ErrorNoResponse(400, ex.getMessage()));

@@ -7,4 +7,5 @@ public interface IEmailService {
 	void sendResetPassword(String email);
 	void sendEmailForCustomer(String email, Long packageId, Integer orderId);
 	void sendEmailForNotificationAdmin(String email, Long packageId, Integer orderId);
+	void sendEmailReport(String email, Long packageId, Integer orderId, String content);
 }

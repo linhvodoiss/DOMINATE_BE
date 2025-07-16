@@ -125,6 +125,21 @@ public class PaymentOrderService implements IPaymentOrderService {
             throw new RuntimeException("Trạng thái không hợp lệ");
         }
     }
+    @Override
+    public PaymentOrder changeStatusOrderSilently(Integer orderId, String newStatus) {
+        PaymentOrder order = repository.findByOrderId(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với orderId: " + orderId));
+
+        try {
+            PaymentOrder.PaymentStatus status = PaymentOrder.PaymentStatus.valueOf(newStatus);
+            order.setPaymentStatus(status);
+            order.setUpdatedAt(LocalDateTime.now());
+            return repository.save(order);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Trạng thái không hợp lệ");
+        }
+    }
+
 
 
 
@@ -210,7 +225,7 @@ public class PaymentOrderService implements IPaymentOrderService {
                     .billingCycle(subscription.getBillingCycle().name())
                     .typePackage(subscription.getTypePackage().name())
                     .isActive(subscription.getIsActive())
-                    .options(optionDTOs) // ✅ optionDTOs không chứa subscriptionPackages
+                    .options(optionDTOs)
                     .simulatedCount(subscription.getSimulatedCount())
                     .createdAt(subscription.getCreatedAt())
                     .updatedAt(subscription.getUpdatedAt())
@@ -249,6 +264,10 @@ public class PaymentOrderService implements IPaymentOrderService {
                     .updatedAt(license.getUpdatedAt())
                     .build();
         }
+        boolean canReport = false;
+        if (entity.getCreatedAt() != null) {
+            canReport = LocalDateTime.now().isAfter(entity.getCreatedAt().plusMinutes(1));
+        }
         return PaymentOrderDTO.builder()
                 .id(entity.getId())
                 .orderId(entity.getOrderId())
@@ -260,6 +279,7 @@ public class PaymentOrderService implements IPaymentOrderService {
                 .paymentStatus(entity.getPaymentStatus().name())
                 .paymentMethod(entity.getPaymentMethod().name())
                 .licenseCreated(entity.getLicenseCreated())
+                .canReport(canReport)
                 .userId(entity.getUser().getId())
                 .subscriptionId(subscription != null ? subscription.getId() : null)
                 .createdAt(entity.getCreatedAt())

@@ -22,7 +22,7 @@ public interface ILicenseService {
     LicenseDTO getById(Long id);
 
     LicenseDTO create(LicenseDTO dto);
-    LicenseDTO createLicense(LicenseCreateForm form);
+    LicenseDTO createLicense(LicenseCreateForm form,String ip);
     LicenseDTO activateNextLicense(Long userId, SubscriptionPackage.TypePackage type);
     LicenseVerifyResponse verifyLicense(LicenseVerifyRequestForm request);
     LicenseVerifyResponse verifyLicensePro(LicenseVerifyRequestForm request);

@@ -16,6 +16,8 @@ public interface IPaymentOrderService {
     PaymentOrderDTO createOrder(OrderFormCreating form, Long userId);
     PaymentOrder changeStatusOrder(Long orderId, String newStatus);
     PaymentOrder changeStatusOrderByOrderId(Integer orderId, String newStatus);
+    PaymentOrder changeStatusOrderSilently(Integer orderId, String newStatus);
+
     List<PaymentOrderDTO> getAll();
 //    List<PaymentOrderDTO> getByUserId(Long userId);
     PaymentOrderDTO getById(Long id);

@@ -14,6 +14,8 @@ import com.fpt.service.IPaymentOrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -39,7 +41,7 @@ public class PaymentOrderController {
 
     @GetMapping()
     public ResponseEntity<PaginatedResponse<PaymentOrderDTO>> getAllOrders(
-            Pageable pageable,
+            @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) Long subscriptionId,
             @RequestParam(required = false) PaymentOrder.PaymentStatus status
@@ -78,14 +80,28 @@ public class PaymentOrderController {
                     e.getMessage(),
                     null
             ));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(new SuccessResponse<>(
-                    500,
-                    "Lỗi hệ thống",
+        }
+    }
+    @PatchMapping("/silent/{orderId}")
+    public ResponseEntity<SuccessResponse<String>> updateOrderStatusSilently(
+            @PathVariable Integer orderId,
+            @RequestParam String newStatus) {
+        try {
+            PaymentOrder updatedOrder = service.changeStatusOrderSilently(orderId, newStatus);
+            return ResponseEntity.ok(new SuccessResponse<>(
+                    200,
+                    "Cập nhật trạng thái thành công (không gửi socket)",
+                    updatedOrder.getPaymentStatus().name()
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new SuccessResponse<>(
+                    400,
+                    e.getMessage(),
                     null
             ));
         }
     }
+
 
     @PostMapping("/email")
     public ResponseEntity<SuccessNoResponse> sendEmailCustomer(
@@ -115,9 +131,23 @@ public class PaymentOrderController {
         ));
     }
 
+    @PostMapping("/emailReport")
+    public ResponseEntity<SuccessNoResponse> sendEmailReport(
+            @RequestParam("packageId") Long packageId,
+            @RequestParam("orderId") Integer orderId,
+            @RequestParam("email") String email,
+            @RequestParam("content") String content
+    ) {
+        emailService.sendEmailReport(email, packageId, orderId,content);
+        return ResponseEntity.ok(new SuccessNoResponse(
+                200,
+                "Your report have been send."
+        ));
+    }
+
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<PaginatedResponse<PaymentOrderDTO>> getByUserId(Pageable pageable,@PathVariable Long userId,            @RequestParam(required = false) String search,
+    public ResponseEntity<PaginatedResponse<PaymentOrderDTO>> getByUserId( @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable,@PathVariable Long userId,            @RequestParam(required = false) String search,
                                                              @RequestParam(required = false) Long subscriptionId,
                                                              @RequestParam(required = false) PaymentOrder.PaymentStatus status) {
         Page<PaymentOrderDTO> dtoPage = service.getUserPackage(pageable, search,subscriptionId, status,userId);

@@ -86,7 +86,7 @@ public class EmailService implements IEmailService {
 
 		String confirmationUrl = frontendUrl +"/orders/" + packageId + "?orderId=" + orderId;
 
-		String subject = "Confirm Your Payment";
+		String subject = "Confirm Your Order "+orderId;
 		String content = "<p>Hello " + ",</p>"
 				+ "<p>DOMINATE have an new order. Please <a href=\"" + confirmationUrl + "\">click here to confirm </a>.</p>";
 
@@ -94,6 +94,18 @@ public class EmailService implements IEmailService {
 		sendEmail(email, subject, content);
 	}
 
+	@Override
+	public void sendEmailReport(String email, Long packageId, Integer orderId, String content) {
+
+		String confirmationUrl = frontendUrl +"/orders/" + packageId + "?orderId=" + orderId;
+
+		String subject = "Report order "+orderId;
+		String contentMess = "<p>Reason: " + content +",</p>"
+				+ "<p>Check <a href=\"" + confirmationUrl + "\">click here to view order </a>.</p>";
+
+
+		sendEmail(email, subject, contentMess);
+	}
 
 
 

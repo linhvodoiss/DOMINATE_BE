@@ -24,6 +24,7 @@ public class PaymentOrderDTO {
     private LicenseDTO license;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Boolean canReport;
     private SubscriptionPackageDTO subscription;
 }
 

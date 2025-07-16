@@ -170,7 +170,7 @@ public class PayOSController {
     @PostMapping("/cancel/{paymentLinkId}")
     public ResponseEntity<SuccessNoResponse> cancelPaymentRequest(
             @PathVariable("paymentLinkId") Integer paymentLinkId,
-            @RequestParam(defaultValue = "Khách huỷ đơn") String reason) {
+            @RequestParam(defaultValue = "Cancel payment") String reason) {
         try {
             payOSService.cancelPaymentRequest(paymentLinkId, reason);
             paymentOrderService.changeStatusOrderByOrderId(paymentLinkId, "FAILED");

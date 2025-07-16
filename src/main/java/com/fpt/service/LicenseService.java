@@ -88,7 +88,7 @@ public class LicenseService implements ILicenseService {
     }
 
     @Override
-    public LicenseDTO createLicense(LicenseCreateForm form) {
+    public LicenseDTO createLicense(LicenseCreateForm form, String ip) {
         PaymentOrder order = paymentOrderRepository.findByOrderId(form.getOrderId())
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn hàng"));
 
@@ -114,7 +114,7 @@ public class LicenseService implements ILicenseService {
         License license = new License();
         license.setLicenseKey(generateLicenseKey());
         license.setDuration(durationDays);
-        license.setIp(form.getIp());
+        license.setIp(ip);
         license.setHardwareId(form.getHardwareId());
         license.setUser(order.getUser());
         license.setSubscriptionPackage(subscription);

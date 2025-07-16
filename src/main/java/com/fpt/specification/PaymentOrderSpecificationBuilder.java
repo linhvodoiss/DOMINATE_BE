@@ -34,6 +34,10 @@ public class PaymentOrderSpecificationBuilder {
 						String[] parts = field.split("\\.");
 						return cb.like(cb.lower(root.get(parts[0]).get(parts[1])), "%" + search.toLowerCase() + "%");
 					} else {
+						if (field.equals("orderId")) {
+
+							return cb.like(cb.function("STR", String.class, root.get(field)), "%" + search + "%");
+						}
 						return cb.like(cb.lower(root.get(field)), "%" + search.toLowerCase() + "%");
 					}
 				});
