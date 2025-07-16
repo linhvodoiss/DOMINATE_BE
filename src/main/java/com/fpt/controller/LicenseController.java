@@ -80,6 +80,33 @@ public ResponseEntity<PaginatedResponse<LicenseDTO>> getAllOrders(
         }
     }
 
+    @PostMapping("/bind-hardware")
+    public ResponseEntity<?> bindHardware(@RequestBody Map<String, String> request) {
+        String licenseKey = request.get("licenseKey");
+        String hardwareId = request.get("hardwareId");
+
+        if (licenseKey == null || hardwareId == null) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "code", 400,
+                    "message", "Lost licenseKey or hardwareId"
+            ));
+        }
+
+        try {
+            LicenseDTO dto = service.bindHardwareIdToLicense(licenseKey, hardwareId);
+            return ResponseEntity.ok(Map.of(
+                    "code", 200,
+                    "message", "Register device successfully",
+                    "data", dto
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(Map.of(
+                    "code", 400,
+                    "message", e.getMessage()
+            ));
+        }
+    }
+
     @PostMapping("/activate-next/{userId}")
     public ResponseEntity<?> activateNextLicense(
             @PathVariable Long userId,

@@ -90,13 +90,13 @@ public class LicenseService implements ILicenseService {
     @Override
     public LicenseDTO createLicense(LicenseCreateForm form, String ip) {
         PaymentOrder order = paymentOrderRepository.findByOrderId(form.getOrderId())
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn hàng"));
+                .orElseThrow(() -> new IllegalArgumentException("Not found order."));
 
         if (order.getPaymentStatus() != PaymentOrder.PaymentStatus.SUCCESS) {
-            throw new IllegalArgumentException("Đơn hàng chưa được thanh toán");
+            throw new IllegalArgumentException("Unpaid order.");
         }
         if (Boolean.TRUE.equals(order.getLicenseCreated())) {
-            throw new IllegalArgumentException("License đã được tạo cho đơn hàng này");
+            throw new IllegalArgumentException("License have created with this order.");
         }
 
         SubscriptionPackage subscription = order.getSubscriptionPackage();
@@ -104,7 +104,7 @@ public class LicenseService implements ILicenseService {
             case MONTHLY -> 30;
             case HALF_YEARLY -> 182;
             case YEARLY -> 365;
-            default -> throw new IllegalStateException("BillingCycle không hợp lệ");
+            default -> throw new IllegalStateException("BillingCycle is not valid.");
         };
 
         Long userId = order.getUser().getId();
@@ -125,6 +125,39 @@ public class LicenseService implements ILicenseService {
         return toDtoWithSubscription(saved);
     }
 
+    public LicenseDTO bindHardwareIdToLicense(String licenseKey, String hardwareId) {
+        License license = licenseRepository.findByLicenseKey(licenseKey)
+                .orElseThrow(() -> new IllegalArgumentException("License is not exist."));
+
+        // Have hwi, check match device
+        if (license.getHardwareId() != null) {
+            if (!license.getHardwareId().equals(hardwareId)) {
+                throw new IllegalStateException("License have match with other device.");
+            }
+            // match HWID → no assign
+            return toDtoWithSubscription(license);
+        }
+
+        if (!Boolean.TRUE.equals(license.getCanUsed())) {
+            throw new IllegalStateException("License haven't active.");
+        }
+
+        LocalDateTime expiredAt = license.getCreatedAt().plusDays(license.getDuration());
+        if (expiredAt.isBefore(LocalDateTime.now())) {
+            throw new IllegalStateException("License have expired.");
+        }
+
+        // Assign HWID
+        license.setHardwareId(hardwareId);
+        licenseRepository.save(license);
+
+        return toDtoWithSubscription(license);
+    }
+
+
+
+
+
     @Override
     public LicenseDTO activateNextLicense(Long userId, SubscriptionPackage.TypePackage type) {
         List<License> userLicenses = licenseRepository.findByUserId(userId)
@@ -140,7 +173,7 @@ public class LicenseService implements ILicenseService {
                 .findFirst()
                 .ifPresent(currentUsed -> {
                     if (currentUsed.getCreatedAt().plusDays(currentUsed.getDuration()).isAfter(now)) {
-                        throw new IllegalArgumentException("Key " + type + " hiện tại vẫn còn hạn sử dụng");
+                        throw new IllegalArgumentException("Key " + type + " still valid.");
                     }
                     currentUsed.setCanUsed(false);
                     licenseRepository.save(currentUsed);
@@ -154,7 +187,7 @@ public class LicenseService implements ILicenseService {
                 .toList();
 
         if (validUnusedLicenses.isEmpty()) {
-            throw new IllegalArgumentException("Không còn key nào thuộc loại " + type + " còn hạn để sử dụng");
+            throw new IllegalArgumentException("No key belong " + type + " have expired date.");
         }
 
         // B3: Kích hoạt
@@ -170,53 +203,53 @@ public class LicenseService implements ILicenseService {
         Optional<License> licenseOpt = licenseRepository.findByLicenseKey(request.getLicenseKey());
 
         if (licenseOpt.isEmpty()) {
-            return new LicenseVerifyResponse(false, 404, null, "License không tồn tại", null);
+            return new LicenseVerifyResponse(false, 404, null, "License is not exist.", null);
         }
 
         License license = licenseOpt.get();
 
         if (!Boolean.TRUE.equals(license.getCanUsed())) {
-            return new LicenseVerifyResponse(false, 401, null, "License chưa được kích hoạt", null);
+            return new LicenseVerifyResponse(false, 401, null, "License haven't active.", null);
         }
 
         if (!license.getHardwareId().equals(request.getHardwareId())) {
-            return new LicenseVerifyResponse(false, 403, null, "License không hợp lệ với thiết bị này", null);
+            return new LicenseVerifyResponse(false, 403, null, "License don't have match with other device.", null);
         }
 
         LocalDateTime expiredAt = license.getCreatedAt().plusDays(license.getDuration());
         if (expiredAt.isBefore(LocalDateTime.now())) {
-            return new LicenseVerifyResponse(false, 400, null, "License đã hết hạn", expiredAt);
+            return new LicenseVerifyResponse(false, 400, null, "License is expired.", expiredAt);
         }
 
         SubscriptionPackage.TypePackage type = license.getSubscriptionPackage().getTypePackage();
-        return new LicenseVerifyResponse(true, 200, type.toString(), "License hợp lệ", expiredAt);
+        return new LicenseVerifyResponse(true, 200, type.toString(), "License is valid.", expiredAt);
     }
 
     public LicenseVerifyResponse verifyLicensePro(LicenseVerifyRequestForm request) {
         Optional<License> licenseOpt = licenseRepository.findByLicenseKey(request.getLicenseKey());
 
         if (licenseOpt.isEmpty()) {
-            return new LicenseVerifyResponse(false, 404, null, "License không tồn tại", null);
+            return new LicenseVerifyResponse(false, 404, null, "License is not exist.", null);
         }
 
         License license = licenseOpt.get();
 
         if (!Boolean.TRUE.equals(license.getCanUsed())) {
-            return new LicenseVerifyResponse(false, 401, null, "License chưa được kích hoạt", null);
+            return new LicenseVerifyResponse(false, 401, null, "License haven't active.", null);
         }
 
         if (!license.getUser().getId().equals(request.getUserId())) {
-            return new LicenseVerifyResponse(false, 403, null, "License không hợp lệ với người dùng này", null);
+            return new LicenseVerifyResponse(false, 403, null, "License don't have match with these user.", null);
         }
 
         LocalDateTime expiredAt = license.getCreatedAt().plusDays(license.getDuration());
         if (expiredAt.isBefore(LocalDateTime.now())) {
-            return new LicenseVerifyResponse(false, 400, null, "License đã hết hạn", expiredAt);
+            return new LicenseVerifyResponse(false, 400, null, "License is expired.", expiredAt);
         }
 
         SubscriptionPackage.TypePackage type = license.getSubscriptionPackage().getTypePackage();
 
-        return new LicenseVerifyResponse(true, 200, type.toString(), "License hợp lệ", expiredAt);
+        return new LicenseVerifyResponse(true, 200, type.toString(), "License is valid.", expiredAt);
     }
 
 
@@ -229,7 +262,7 @@ public class LicenseService implements ILicenseService {
     @Override
     public LicenseDTO update(Long id, LicenseDTO dto) {
         License license = licenseRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("License not found"));
+                .orElseThrow(() -> new RuntimeException("License not found."));
 
         license.setLicenseKey(dto.getLicenseKey());
         license.setDuration(dto.getDuration());
