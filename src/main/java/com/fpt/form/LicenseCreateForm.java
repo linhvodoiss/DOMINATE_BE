@@ -7,4 +7,5 @@ import lombok.Data;
 public class LicenseCreateForm {
     private Integer orderId;
     private String hardwareId;
+    private String licenseKey;
 }

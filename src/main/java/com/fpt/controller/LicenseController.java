@@ -81,11 +81,10 @@ public ResponseEntity<PaginatedResponse<LicenseDTO>> getAllOrders(
     }
 
     @PostMapping("/bind-hardware")
-    public ResponseEntity<?> bindHardware(@RequestBody Map<String, String> request) {
-        String licenseKey = request.get("licenseKey");
-        String hardwareId = request.get("hardwareId");
+    public ResponseEntity<?> bindHardware(@RequestBody LicenseCreateForm form) {
 
-        if (licenseKey == null || hardwareId == null) {
+
+        if (form.getLicenseKey() == null || form.getHardwareId() == null) {
             return ResponseEntity.badRequest().body(Map.of(
                     "code", 400,
                     "message", "Lost licenseKey or hardwareId"
@@ -93,7 +92,7 @@ public ResponseEntity<PaginatedResponse<LicenseDTO>> getAllOrders(
         }
 
         try {
-            LicenseDTO dto = service.bindHardwareIdToLicense(licenseKey, hardwareId);
+            LicenseDTO dto = service.bindHardwareIdToLicense(form);
             return ResponseEntity.ok(Map.of(
                     "code", 200,
                     "message", "Register device successfully",

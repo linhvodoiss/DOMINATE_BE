@@ -115,7 +115,6 @@ public class LicenseService implements ILicenseService {
         license.setLicenseKey(generateLicenseKey());
         license.setDuration(durationDays);
         license.setIp(ip);
-        license.setHardwareId(form.getHardwareId());
         license.setUser(order.getUser());
         license.setSubscriptionPackage(subscription);
         license.setCanUsed(!hasActiveLicense);
@@ -125,17 +124,15 @@ public class LicenseService implements ILicenseService {
         return toDtoWithSubscription(saved);
     }
 
-    public LicenseDTO bindHardwareIdToLicense(String licenseKey, String hardwareId) {
-        License license = licenseRepository.findByLicenseKey(licenseKey)
+    public LicenseDTO bindHardwareIdToLicense(LicenseCreateForm form) {
+        License license = licenseRepository.findByLicenseKey(form.getLicenseKey())
                 .orElseThrow(() -> new IllegalArgumentException("License is not exist."));
 
         // Have hwi, check match device
         if (license.getHardwareId() != null) {
-            if (!license.getHardwareId().equals(hardwareId)) {
-                throw new IllegalStateException("License have match with other device.");
+            if (!license.getHardwareId().equals(form.getHardwareId())) {
+                throw new IllegalStateException("License don't have match with other device.");
             }
-            // match HWID → no assign
-            return toDtoWithSubscription(license);
         }
 
         if (!Boolean.TRUE.equals(license.getCanUsed())) {
@@ -148,7 +145,7 @@ public class LicenseService implements ILicenseService {
         }
 
         // Assign HWID
-        license.setHardwareId(hardwareId);
+        license.setHardwareId(form.getHardwareId());
         licenseRepository.save(license);
 
         return toDtoWithSubscription(license);
@@ -310,6 +307,7 @@ public class LicenseService implements ILicenseService {
                 .daysLeft(daysLeft)
                 .canUsed(l.getCanUsed())
                 .subscriptionId(l.getSubscriptionPackage().getId())
+                .orderId(l.getOrderId())
                 .createdAt(l.getCreatedAt())
                 .updatedAt(l.getUpdatedAt())
                 .subscription(modelMapper.map(l.getSubscriptionPackage(), SubscriptionPackageDTO.class))
