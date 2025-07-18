@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -37,7 +39,7 @@ public class SubscriptionPackageController {
 
     @GetMapping("/list")
     public ResponseEntity<PaginatedResponse<SubscriptionPackageDTO>> getAllPackages(
-            Pageable pageable,
+            @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(required = false) String search
     ) {
         Page<SubscriptionPackageDTO> dtoPage = service.getAllPackage(pageable, search);
@@ -47,7 +49,7 @@ public class SubscriptionPackageController {
 
     @GetMapping("/customer/list")
     public ResponseEntity<PaginatedResponse<SubscriptionPackageDTO>> getAllPackagesCustomer(
-            Pageable pageable,
+            @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(required = false) String search
     ) {
         Page<SubscriptionPackageDTO> dtoPage = service.getAllPackageCustomer(pageable, search);

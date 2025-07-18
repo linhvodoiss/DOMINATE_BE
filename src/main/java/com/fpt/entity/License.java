@@ -43,4 +43,6 @@ public class License {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+    @Column(name = "activated_at")
+    private LocalDateTime activatedAt;
 }

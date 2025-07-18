@@ -18,6 +18,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -44,7 +46,7 @@ public class LicenseController {
 //    }
 @GetMapping()
 public ResponseEntity<PaginatedResponse<LicenseDTO>> getAllOrders(
-        Pageable pageable,
+        @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
         @RequestParam(required = false) String search
 
 ) {
@@ -54,11 +56,21 @@ public ResponseEntity<PaginatedResponse<LicenseDTO>> getAllOrders(
 }
 
     @GetMapping("user/{userId}")
-    public ResponseEntity<PaginatedResponse<LicenseDTO>> getByUserId(Pageable pageable,@PathVariable Long userId, @RequestParam(required = false) String search) {
-        Page<LicenseDTO> dtoPage = service.getUserLicense(pageable, search,userId);
+    public ResponseEntity<PaginatedResponse<LicenseDTO>> getByUserId(@PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable, @PathVariable Long userId, @RequestParam(required = false) String search, @RequestParam(required = false) SubscriptionPackage.TypePackage type) {
+        Page<LicenseDTO> dtoPage = service.getUserLicense(pageable, search,userId,type);
         PaginatedResponse<LicenseDTO> response = new PaginatedResponse<>(dtoPage, HttpServletResponse.SC_OK, "Lấy danh sách các license thành công");
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("canUsed/{userId}")
+    public ResponseEntity<SuccessResponse<List<LicenseDTO>>> getCanUsedLicenses(@PathVariable Long userId) {
+        List<LicenseDTO> licenseDTOs = service.getLicenseIsActiveOfUser(userId);
+        return ResponseEntity.ok(new SuccessResponse<>(200, "Lấy danh sách license đang sử dụng thành công", licenseDTOs));
+    }
+
+
+
+
     @GetMapping("/{id}")
     public LicenseDTO getById(@PathVariable Long id) {
         return service.getById(id);
@@ -113,7 +125,7 @@ public ResponseEntity<PaginatedResponse<LicenseDTO>> getAllOrders(
     ) {
         try {
             LicenseDTO dto = service.activateNextLicense(userId, type);
-            return ResponseEntity.ok(dto);
+            return ResponseEntity.ok(new SuccessResponse<>(200, "Get new license "+type+ " key to activate successfully", dto));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("code", 400, "message", e.getMessage()));
         } catch (Exception e) {

@@ -19,6 +19,7 @@ public class LicenseDTO {
     private Long subscriptionId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private LocalDateTime activatedAt;
     private Boolean isExpired;
     private Integer daysLeft;
     private Boolean canUsed;

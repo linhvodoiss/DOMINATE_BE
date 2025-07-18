@@ -88,7 +88,7 @@ public class DataSeeder implements CommandLineRunner {
             for (SubscriptionPackage.BillingCycle cycle : SubscriptionPackage.BillingCycle.values()) {
                 // RUNTIME package
                 SubscriptionPackage runtimePackage = SubscriptionPackage.builder()
-                        .name("Runtime Package - " + cycle.name())
+                        .name("Runtime Package")
                         .price(getFixedPrice(cycle))
                         .discount(0f)
                         .billingCycle(cycle)
@@ -99,7 +99,7 @@ public class DataSeeder implements CommandLineRunner {
 
                 // DEV package
                 SubscriptionPackage devPackage = SubscriptionPackage.builder()
-                        .name("Dev Package - " + cycle.name())
+                        .name("Dev Package")
                         .price(getFixedPrice(cycle))
                         .discount(10f)
                         .billingCycle(cycle)
@@ -156,6 +156,7 @@ public class DataSeeder implements CommandLineRunner {
                     .ip("203.113.78.9")
                     .hardwareId("203.113.78.9")
                     .canUsed(false)
+                    .activatedAt(null)
                     .orderId(paymentOrder != null ? paymentOrder.getOrderId() : null)
                     .build();
 

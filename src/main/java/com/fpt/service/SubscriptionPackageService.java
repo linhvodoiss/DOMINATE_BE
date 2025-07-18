@@ -35,14 +35,14 @@ public class SubscriptionPackageService implements ISubscriptionPackageService {
 @Autowired
 private ModelMapper modelMapper;
     @Override
-    public Page<SubscriptionPackageDTO> getAllPackage(@PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable, String search) {
+    public Page<SubscriptionPackageDTO> getAllPackage(Pageable pageable, String search) {
         SubscriptionPackageSpecificationBuilder specification = new SubscriptionPackageSpecificationBuilder(search);
         return repository.findAll(specification.build(), pageable)
                 .map(subscription -> modelMapper.map(subscription, SubscriptionPackageDTO.class));
     }
 
     @Override
-    public Page<SubscriptionPackageDTO> getAllPackageCustomer( @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable, String search) {
+    public Page<SubscriptionPackageDTO> getAllPackageCustomer( Pageable pageable, String search) {
         SubscriptionPackageSpecificationBuilder specification = new SubscriptionPackageSpecificationBuilder(search,true);
         return repository.findAll(specification.build(), pageable)
                 .map(subscription -> modelMapper.map(subscription, SubscriptionPackageDTO.class));

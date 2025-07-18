@@ -16,11 +16,11 @@ import java.util.List;
 
 public interface ILicenseService {
     Page<LicenseDTO> getAllLicense(Pageable pageable, String search);
-    Page<LicenseDTO> getUserLicense(Pageable pageable, String search,Long userId);
+    Page<LicenseDTO> getUserLicense(Pageable pageable, String search,Long userId,SubscriptionPackage.TypePackage type);
     List<LicenseDTO> convertToDto(List<License> licenses);
     List<LicenseDTO> getAll();
     LicenseDTO getById(Long id);
-
+    List<LicenseDTO> getLicenseIsActiveOfUser(Long userId);
     LicenseDTO create(LicenseDTO dto);
     LicenseDTO createLicense(LicenseCreateForm form,String ip);
     LicenseDTO bindHardwareIdToLicense(LicenseCreateForm form);

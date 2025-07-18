@@ -21,7 +21,7 @@ public class PaginatedResponse<T> {
 
     public PaginatedResponse(Page<T> page, int code, String message) {
         this.content = page.getContent();
-        this.pageNumber = page.getNumber();
+        this.pageNumber = page.getNumber()+1;
         this.pageSize = page.getSize();
         this.totalElements = page.getTotalElements();
         this.totalPages = page.getTotalPages();

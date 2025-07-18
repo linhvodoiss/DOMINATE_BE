@@ -9,14 +9,16 @@ import org.springframework.util.StringUtils;
 public class LicenseSpecificationBuilder {
 
 	private final String search;
+	private final SubscriptionPackage.TypePackage type;
 	private final Long userId;
 
-	public LicenseSpecificationBuilder(String search,Long userId) {
+	public LicenseSpecificationBuilder(String search,Long userId,SubscriptionPackage.TypePackage type) {
 		this.search = search;
 		this.userId = userId;
+		this.type=type;
 	}
 	public LicenseSpecificationBuilder(String search) {
-		this(search, null);
+		this(search,null, null);
 	}
 
 	public Specification<License> build() {
@@ -32,6 +34,9 @@ public class LicenseSpecificationBuilder {
 		}
 		if (userId != null) {
 			searchSpec = searchSpec.and((root, query, cb) -> cb.equal(root.get("user").get("id"), userId));
+		}
+		if (type != null) {
+			searchSpec = searchSpec.and((root, query, cb) -> cb.equal(root.get("subscriptionPackage").get("typePackage"), type));
 		}
 		return searchSpec;
 	}

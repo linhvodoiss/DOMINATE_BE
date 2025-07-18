@@ -244,7 +244,7 @@ public class PaymentOrderService implements IPaymentOrderService {
                 daysLeft = license.getDuration();
             } else {
                 LocalDateTime now = LocalDateTime.now();
-                LocalDateTime expiryDate = license.getCreatedAt().plusDays(license.getDuration());
+                LocalDateTime expiryDate = license.getActivatedAt().plusDays(license.getDuration());
                 isExpired = now.isAfter(expiryDate);
                 daysLeft = isExpired ? 0 : (int) Duration.between(now, expiryDate).toDays();
             }
@@ -262,6 +262,7 @@ public class PaymentOrderService implements IPaymentOrderService {
                     .subscriptionId(license.getSubscriptionPackage().getId())
                     .createdAt(license.getCreatedAt())
                     .updatedAt(license.getUpdatedAt())
+                    .activatedAt(license.getActivatedAt())
                     .build();
         }
         boolean canReport = false;

@@ -6,6 +6,7 @@ import com.fpt.dto.SubscriptionPackageDTO;
 import com.fpt.entity.License;
 import com.fpt.entity.PaymentOrder;
 import com.fpt.entity.SubscriptionPackage;
+import com.fpt.entity.User;
 import com.fpt.form.LicenseCreateForm;
 import com.fpt.form.LicenseVerifyRequestForm;
 import com.fpt.payload.LicenseVerifyResponse;
@@ -14,7 +15,6 @@ import com.fpt.repository.PaymentOrderRepository;
 import com.fpt.repository.SubscriptionPackageRepository;
 import com.fpt.repository.UserRepository;
 import com.fpt.specification.LicenseSpecificationBuilder;
-import com.fpt.specification.PaymentOrderSpecificationBuilder;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.function.Supplier;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +41,7 @@ public class LicenseService implements ILicenseService {
     private final UserRepository userRepository;
     private final SubscriptionPackageRepository subscriptionRepository;
     private final IPaymentOrderService paymentOrderService;
+
     @Autowired
     private ModelMapper modelMapper;
 
@@ -52,8 +53,8 @@ public class LicenseService implements ILicenseService {
     }
 
     @Override
-    public Page<LicenseDTO> getUserLicense(Pageable pageable, String search, Long userId) {
-        LicenseSpecificationBuilder specification = new LicenseSpecificationBuilder(search,userId);
+    public Page<LicenseDTO> getUserLicense(Pageable pageable, String search, Long userId,SubscriptionPackage.TypePackage type) {
+        LicenseSpecificationBuilder specification = new LicenseSpecificationBuilder(search, userId,type);
         return licenseRepository.findAll(specification.build(), pageable)
                 .map(this::toDtoWithSubscription);
     }
@@ -83,6 +84,22 @@ public class LicenseService implements ILicenseService {
     }
 
     @Override
+    public List<LicenseDTO> getLicenseIsActiveOfUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        List<License> licenses = licenseRepository.findByUserId(userId)
+                .stream()
+                .filter(license -> Boolean.TRUE.equals(license.getCanUsed()))
+                .toList();
+
+        return licenses.stream()
+                .map(this::toDtoWithSubscription)
+                .collect(Collectors.toList());
+    }
+
+
+    @Override
     public LicenseDTO create(LicenseDTO dto) {
         return toDtoWithSubscription(licenseRepository.save(toEntity(dto)));
     }
@@ -110,15 +127,21 @@ public class LicenseService implements ILicenseService {
         Long userId = order.getUser().getId();
         boolean hasActiveLicense = licenseRepository.existsByUserIdAndCanUsedTrue(userId);
 
-
         License license = new License();
         license.setLicenseKey(generateLicenseKey());
         license.setDuration(durationDays);
         license.setIp(ip);
         license.setUser(order.getUser());
         license.setSubscriptionPackage(subscription);
-        license.setCanUsed(!hasActiveLicense);
         license.setOrderId(form.getOrderId());
+        license.setCanUsed(!hasActiveLicense);
+
+        if (!hasActiveLicense) {
+            license.setActivatedAt(LocalDateTime.now());
+        } else {
+            license.setActivatedAt(null);
+        }
+
         order.setLicenseCreated(true);
         License saved = licenseRepository.save(license);
         return toDtoWithSubscription(saved);
@@ -128,32 +151,24 @@ public class LicenseService implements ILicenseService {
         License license = licenseRepository.findByLicenseKey(form.getLicenseKey())
                 .orElseThrow(() -> new IllegalArgumentException("License is not exist."));
 
-        // Have hwi, check match device
-        if (license.getHardwareId() != null) {
-            if (!license.getHardwareId().equals(form.getHardwareId())) {
-                throw new IllegalStateException("License don't have match with other device.");
-            }
+        if (license.getHardwareId() != null && !license.getHardwareId().equals(form.getHardwareId())) {
+            throw new IllegalStateException("License don't have match with other device.");
         }
 
         if (!Boolean.TRUE.equals(license.getCanUsed())) {
             throw new IllegalStateException("License haven't active.");
         }
 
-        LocalDateTime expiredAt = license.getCreatedAt().plusDays(license.getDuration());
+        LocalDateTime expiredAt = license.getActivatedAt().plusDays(license.getDuration());
         if (expiredAt.isBefore(LocalDateTime.now())) {
             throw new IllegalStateException("License have expired.");
         }
 
-        // Assign HWID
         license.setHardwareId(form.getHardwareId());
         licenseRepository.save(license);
 
         return toDtoWithSubscription(license);
     }
-
-
-
-
 
     @Override
     public LicenseDTO activateNextLicense(Long userId, SubscriptionPackage.TypePackage type) {
@@ -164,19 +179,18 @@ public class LicenseService implements ILicenseService {
 
         LocalDateTime now = LocalDateTime.now();
 
-        // B1: Tìm key đang dùng hiện tại của loại này
         userLicenses.stream()
                 .filter(l -> Boolean.TRUE.equals(l.getCanUsed()))
                 .findFirst()
                 .ifPresent(currentUsed -> {
-                    if (currentUsed.getCreatedAt().plusDays(currentUsed.getDuration()).isAfter(now)) {
+                    if (currentUsed.getActivatedAt() != null &&
+                            currentUsed.getActivatedAt().plusDays(currentUsed.getDuration()).isAfter(now)) {
                         throw new IllegalArgumentException("Key " + type + " still valid.");
                     }
                     currentUsed.setCanUsed(false);
                     licenseRepository.save(currentUsed);
                 });
 
-        // B2: Tìm key chưa dùng, còn hạn
         List<License> validUnusedLicenses = userLicenses.stream()
                 .filter(l -> Boolean.FALSE.equals(l.getCanUsed()))
                 .filter(l -> l.getCreatedAt().plusDays(l.getDuration()).isAfter(now))
@@ -187,14 +201,13 @@ public class LicenseService implements ILicenseService {
             throw new IllegalArgumentException("No key belong " + type + " have expired date.");
         }
 
-        // B3: Kích hoạt
         License toActivate = validUnusedLicenses.get(0);
         toActivate.setCanUsed(true);
+        toActivate.setActivatedAt(now);
         licenseRepository.save(toActivate);
 
         return toDtoWithSubscription(toActivate);
     }
-
 
     public LicenseVerifyResponse verifyLicense(LicenseVerifyRequestForm request) {
         Optional<License> licenseOpt = licenseRepository.findByLicenseKey(request.getLicenseKey());
@@ -213,7 +226,7 @@ public class LicenseService implements ILicenseService {
             return new LicenseVerifyResponse(false, 403, null, "License don't have match with other device.", null);
         }
 
-        LocalDateTime expiredAt = license.getCreatedAt().plusDays(license.getDuration());
+        LocalDateTime expiredAt = license.getActivatedAt().plusDays(license.getDuration());
         if (expiredAt.isBefore(LocalDateTime.now())) {
             return new LicenseVerifyResponse(false, 400, null, "License is expired.", expiredAt);
         }
@@ -239,23 +252,19 @@ public class LicenseService implements ILicenseService {
             return new LicenseVerifyResponse(false, 403, null, "License don't have match with these user.", null);
         }
 
-        LocalDateTime expiredAt = license.getCreatedAt().plusDays(license.getDuration());
+        LocalDateTime expiredAt = license.getActivatedAt().plusDays(license.getDuration());
         if (expiredAt.isBefore(LocalDateTime.now())) {
             return new LicenseVerifyResponse(false, 400, null, "License is expired.", expiredAt);
         }
 
         SubscriptionPackage.TypePackage type = license.getSubscriptionPackage().getTypePackage();
-
         return new LicenseVerifyResponse(true, 200, type.toString(), "License is valid.", expiredAt);
     }
-
-
-
-
 
     private String generateLicenseKey() {
         return "LIC-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
+
     @Override
     public LicenseDTO update(Long id, LicenseDTO dto) {
         License license = licenseRepository.findById(id)
@@ -281,7 +290,6 @@ public class LicenseService implements ILicenseService {
                 .toList();
     }
 
-    // Dùng khi cần cả Subscription info
     private LicenseDTO toDtoWithSubscription(License l) {
         boolean isExpired;
         int daysLeft;
@@ -291,7 +299,7 @@ public class LicenseService implements ILicenseService {
             daysLeft = l.getDuration();
         } else {
             LocalDateTime now = LocalDateTime.now();
-            LocalDateTime expiryDate = l.getCreatedAt().plusDays(l.getDuration());
+            LocalDateTime expiryDate = l.getActivatedAt().plusDays(l.getDuration());
             isExpired = now.isAfter(expiryDate);
             daysLeft = isExpired ? 0 : (int) Duration.between(now, expiryDate).toDays();
         }
@@ -310,11 +318,10 @@ public class LicenseService implements ILicenseService {
                 .orderId(l.getOrderId())
                 .createdAt(l.getCreatedAt())
                 .updatedAt(l.getUpdatedAt())
+                .activatedAt(l.getActivatedAt())
                 .subscription(modelMapper.map(l.getSubscriptionPackage(), SubscriptionPackageDTO.class))
                 .build();
     }
-
-
 
     private License toEntity(LicenseDTO dto) {
         return License.builder()
