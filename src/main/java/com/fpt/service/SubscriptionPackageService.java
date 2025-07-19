@@ -42,8 +42,8 @@ private ModelMapper modelMapper;
     }
 
     @Override
-    public Page<SubscriptionPackageDTO> getAllPackageCustomer( Pageable pageable, String search) {
-        SubscriptionPackageSpecificationBuilder specification = new SubscriptionPackageSpecificationBuilder(search,true);
+    public Page<SubscriptionPackageDTO> getAllPackageCustomer( Pageable pageable, String search, Double minPrice,Double maxPrice,SubscriptionPackage.TypePackage type) {
+        SubscriptionPackageSpecificationBuilder specification = new SubscriptionPackageSpecificationBuilder(search,true,minPrice,maxPrice,type);
         return repository.findAll(specification.build(), pageable)
                 .map(subscription -> modelMapper.map(subscription, SubscriptionPackageDTO.class));
     }

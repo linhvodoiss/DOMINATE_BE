@@ -50,9 +50,13 @@ public class SubscriptionPackageController {
     @GetMapping("/customer/list")
     public ResponseEntity<PaginatedResponse<SubscriptionPackageDTO>> getAllPackagesCustomer(
             @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
-            @RequestParam(required = false) String search
+            @RequestParam(required = false) String search,
+              @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false) SubscriptionPackage.TypePackage type
+
     ) {
-        Page<SubscriptionPackageDTO> dtoPage = service.getAllPackageCustomer(pageable, search);
+        Page<SubscriptionPackageDTO> dtoPage = service.getAllPackageCustomer(pageable, search,minPrice,maxPrice,type);
         PaginatedResponse<SubscriptionPackageDTO> response = new PaginatedResponse<>(dtoPage, HttpServletResponse.SC_OK, "Lấy danh sách gói đăng ký thành công");
         return ResponseEntity.ok(response);
     }

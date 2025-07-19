@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface ISubscriptionPackageService {
     Page<SubscriptionPackageDTO> getAllPackage(Pageable pageable, String search);
-    Page<SubscriptionPackageDTO> getAllPackageCustomer(Pageable pageable, String search);
+    Page<SubscriptionPackageDTO> getAllPackageCustomer(Pageable pageable, String search, Double minPrice,Double maxPrice,SubscriptionPackage.TypePackage type );
     List<SubscriptionPackageDTO> convertToDto(List<SubscriptionPackage> data);
     List<SubscriptionPackageDTO> getAll();
     SubscriptionPackageDTO getById(Long id);

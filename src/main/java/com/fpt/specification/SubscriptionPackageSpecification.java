@@ -1,7 +1,6 @@
 package com.fpt.specification;
 
 import com.fpt.entity.SubscriptionPackage;
-import com.fpt.entity.User;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -22,8 +21,15 @@ public class SubscriptionPackageSpecification implements Specification<Subscript
 	public Predicate toPredicate(Root<SubscriptionPackage> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
 
 		if (criteria.getOperator().equalsIgnoreCase("Like")) {
-			// lowercase and uppercase
 			return cb.like(cb.lower(root.get(criteria.getKey())), "%" + criteria.getValue().toString().toLowerCase() + "%");
+		}
+
+		if (criteria.getOperator().equalsIgnoreCase(">=")) {
+			return cb.greaterThanOrEqualTo(root.get(criteria.getKey()), criteria.getValue().toString());
+		}
+
+		if (criteria.getOperator().equalsIgnoreCase("<=")) {
+			return cb.lessThanOrEqualTo(root.get(criteria.getKey()), criteria.getValue().toString());
 		}
 
 		if (criteria.getOperator().equalsIgnoreCase("Equal")) {
