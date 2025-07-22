@@ -8,8 +8,8 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface ISubscriptionPackageService {
-    Page<SubscriptionPackageDTO> getAllPackage(Pageable pageable, String search);
-    Page<SubscriptionPackageDTO> getAllPackageCustomer(Pageable pageable, String search, Double minPrice,Double maxPrice,SubscriptionPackage.TypePackage type );
+    Page<SubscriptionPackageDTO> getAllPackage(Pageable pageable, String search, Boolean isActive, Double minPrice,Double maxPrice,SubscriptionPackage.TypePackage type,SubscriptionPackage.BillingCycle cycle);
+    Page<SubscriptionPackageDTO> getAllPackageCustomer(Pageable pageable, String search, Double minPrice,Double maxPrice,SubscriptionPackage.TypePackage type,SubscriptionPackage.BillingCycle cycle);
     List<SubscriptionPackageDTO> convertToDto(List<SubscriptionPackage> data);
     List<SubscriptionPackageDTO> getAll();
     SubscriptionPackageDTO getById(Long id);

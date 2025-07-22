@@ -11,17 +11,16 @@ public class SubscriptionPackageSpecificationBuilder {
 	private final Double minPrice;
 	private final Double maxPrice;
 	private final SubscriptionPackage.TypePackage type;
-	public SubscriptionPackageSpecificationBuilder(String search, Boolean isActive, Double minPrice, Double maxPrice,SubscriptionPackage.TypePackage type) {
+	private final SubscriptionPackage.BillingCycle cycle;
+	public SubscriptionPackageSpecificationBuilder(String search, Boolean isActive, Double minPrice, Double maxPrice,SubscriptionPackage.TypePackage type,SubscriptionPackage.BillingCycle cycle) {
 		this.search = search;
 		this.isActive = isActive;
 		this.minPrice = minPrice;
 		this.maxPrice = maxPrice;
 		this.type=type;
+		this.cycle=cycle;
 	}
 
-	public SubscriptionPackageSpecificationBuilder(String search) {
-		this(search, null, null, null,null);
-	}
 
 	public Specification<SubscriptionPackage> build() {
 		Specification<SubscriptionPackage> searchSpec = Specification.where(null); // bắt đầu từ null
@@ -43,6 +42,10 @@ public class SubscriptionPackageSpecificationBuilder {
 
 		if (type != null) {
 			searchSpec = searchSpec.and((root, query, cb) -> cb.equal(root.get("typePackage"), type));
+		}
+
+		if (cycle != null) {
+			searchSpec = searchSpec.and((root, query, cb) -> cb.equal(root.get("billingCycle"), cycle));
 		}
 
 		// MIN

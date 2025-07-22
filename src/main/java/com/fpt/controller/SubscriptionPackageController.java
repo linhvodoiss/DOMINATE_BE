@@ -39,10 +39,15 @@ public class SubscriptionPackageController {
 
     @GetMapping("/list")
     public ResponseEntity<PaginatedResponse<SubscriptionPackageDTO>> getAllPackages(
-            @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
-            @RequestParam(required = false) String search
+             Pageable pageable,
+            @RequestParam(required = false) String search,
+             @RequestParam(required = false) Boolean isActive,
+                 @RequestParam(required = false) Double minPrice,
+             @RequestParam(required = false) Double maxPrice,
+             @RequestParam(required = false) SubscriptionPackage.TypePackage type,
+             @RequestParam(required = false) SubscriptionPackage.BillingCycle cycle
     ) {
-        Page<SubscriptionPackageDTO> dtoPage = service.getAllPackage(pageable, search);
+        Page<SubscriptionPackageDTO> dtoPage = service.getAllPackage(pageable, search,isActive,minPrice,maxPrice,type,cycle);
         PaginatedResponse<SubscriptionPackageDTO> response = new PaginatedResponse<>(dtoPage, HttpServletResponse.SC_OK, "Lấy danh sách gói đăng ký thành công");
         return ResponseEntity.ok(response);
     }
@@ -53,10 +58,11 @@ public class SubscriptionPackageController {
             @RequestParam(required = false) String search,
               @RequestParam(required = false) Double minPrice,
             @RequestParam(required = false) Double maxPrice,
-            @RequestParam(required = false) SubscriptionPackage.TypePackage type
+            @RequestParam(required = false) SubscriptionPackage.TypePackage type,
+            @RequestParam(required = false) SubscriptionPackage.BillingCycle cycle
 
     ) {
-        Page<SubscriptionPackageDTO> dtoPage = service.getAllPackageCustomer(pageable, search,minPrice,maxPrice,type);
+        Page<SubscriptionPackageDTO> dtoPage = service.getAllPackageCustomer(pageable, search,minPrice,maxPrice,type,cycle);
         PaginatedResponse<SubscriptionPackageDTO> response = new PaginatedResponse<>(dtoPage, HttpServletResponse.SC_OK, "Lấy danh sách gói đăng ký thành công");
         return ResponseEntity.ok(response);
     }

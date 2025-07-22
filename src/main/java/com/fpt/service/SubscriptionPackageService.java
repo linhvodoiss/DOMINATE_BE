@@ -35,15 +35,15 @@ public class SubscriptionPackageService implements ISubscriptionPackageService {
 @Autowired
 private ModelMapper modelMapper;
     @Override
-    public Page<SubscriptionPackageDTO> getAllPackage(Pageable pageable, String search) {
-        SubscriptionPackageSpecificationBuilder specification = new SubscriptionPackageSpecificationBuilder(search);
+    public Page<SubscriptionPackageDTO> getAllPackage(Pageable pageable, String search, Boolean isActive, Double minPrice,Double maxPrice,SubscriptionPackage.TypePackage type,SubscriptionPackage.BillingCycle cycle) {
+        SubscriptionPackageSpecificationBuilder specification = new SubscriptionPackageSpecificationBuilder(search,isActive,minPrice,maxPrice,type,cycle);
         return repository.findAll(specification.build(), pageable)
                 .map(subscription -> modelMapper.map(subscription, SubscriptionPackageDTO.class));
     }
 
     @Override
-    public Page<SubscriptionPackageDTO> getAllPackageCustomer( Pageable pageable, String search, Double minPrice,Double maxPrice,SubscriptionPackage.TypePackage type) {
-        SubscriptionPackageSpecificationBuilder specification = new SubscriptionPackageSpecificationBuilder(search,true,minPrice,maxPrice,type);
+    public Page<SubscriptionPackageDTO> getAllPackageCustomer( Pageable pageable, String search, Double minPrice,Double maxPrice,SubscriptionPackage.TypePackage type,SubscriptionPackage.BillingCycle cycle) {
+        SubscriptionPackageSpecificationBuilder specification = new SubscriptionPackageSpecificationBuilder(search,true,minPrice,maxPrice,type,cycle);
         return repository.findAll(specification.build(), pageable)
                 .map(subscription -> modelMapper.map(subscription, SubscriptionPackageDTO.class));
     }
