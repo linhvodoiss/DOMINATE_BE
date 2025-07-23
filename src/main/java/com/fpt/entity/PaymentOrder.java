@@ -1,11 +1,10 @@
 package com.fpt.entity;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.UpdateTimestamp;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.*;
 
 import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import java.time.LocalDateTime;
 @Entity
 @Table(name = "PaymentOrder")
@@ -27,6 +26,7 @@ public class PaymentOrder {
 
     @ManyToOne
     @JoinColumn(name = "subscription_id", nullable = false)
+    @NotFound(action = NotFoundAction.IGNORE)
     private SubscriptionPackage subscriptionPackage;
 
     @Column(unique = true, nullable = false)

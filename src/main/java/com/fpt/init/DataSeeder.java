@@ -26,9 +26,9 @@ public class DataSeeder implements CommandLineRunner {
 
         if (optionRepository.count() == 0) {
             List<Option> options = Arrays.asList(
-                    Option.builder().name("5 documents per month").isDeleted(false).build(),
-                    Option.builder().name("Unlimited access").isDeleted(false).build(),
-                    Option.builder().name("Priority support").isDeleted(false).build()
+                    Option.builder().name("5 documents per month").isActive(true).isDeleted(false).build(),
+                    Option.builder().name("Unlimited access").isActive(true).isDeleted(false).build(),
+                    Option.builder().name("Priority support").isActive(true).isDeleted(false).build()
             );
             optionRepository.saveAll(options);
         }

@@ -60,6 +60,71 @@ public class UserService implements IUserService {
 		return userRepository.findAll(specification.build(), pageable);
 	}
 
+	public UserDTO addUserByAdmin(UserDTO dto) {
+		if (userRepository.existsByEmail(dto.getEmail())) {
+			throw new IllegalArgumentException("Email is exist");
+		}
+		if (userRepository.existsByUserName(dto.getUserName())) {
+			throw new IllegalArgumentException("Username is exist");
+		}
+		if (userRepository.existsByPhoneNumber(dto.getPhoneNumber())) {
+			throw new IllegalArgumentException("Phone number is exist");
+		}
+
+		User user = modelMapper.map(dto, User.class);
+		user.setPassword(passwordEncoder.encode(dto.getPassword()));
+		user.setStatus(UserStatus.ACTIVE);
+		User saved = userRepository.save(user);
+		return modelMapper.map(saved, UserDTO.class);
+	}
+
+	public UserDTO updateUserByAdmin(Long userId, UserDTO dto) {
+		User user = userRepository.findById(userId)
+				.orElseThrow(() -> new IllegalArgumentException("User is not exist"));
+
+
+		if (!user.getEmail().equals(dto.getEmail()) && userRepository.existsByEmail(dto.getEmail())) {
+			throw new IllegalArgumentException("Email is exist");
+		}
+		if (!user.getUserName().equals(dto.getUserName()) && userRepository.existsByUserName(dto.getUserName())) {
+			throw new IllegalArgumentException("Username is exist");
+		}
+		if (!user.getPhoneNumber().equals(dto.getPhoneNumber()) && userRepository.existsByPhoneNumber(dto.getPhoneNumber())) {
+			throw new IllegalArgumentException("Phone number is exist");
+		}
+
+		user.setFirstName(dto.getFirstName());
+		user.setLastName(dto.getLastName());
+		user.setEmail(dto.getEmail());
+		user.setUserName(dto.getUserName());
+		user.setPhoneNumber(dto.getPhoneNumber());
+		user.setAvatarUrl(dto.getAvatarUrl());
+		user.setRole(dto.getRole());
+		user.setIsActive(dto.getIsActive());
+		user.setStatus(dto.getStatus());
+		user.setUpdatedAt(LocalDateTime.now());
+
+		User saved = userRepository.save(user);
+		return modelMapper.map(saved, UserDTO.class);
+	}
+
+	@Override
+	public void delete(Long id) {
+		if (!userRepository.existsById(id)) {
+			throw new RuntimeException("Option not found with id: " + id);
+		}
+		userRepository.deleteById(id);
+	}
+	@Override
+	public void deleteMany(List<Long> ids) {
+		List<User> users = userRepository.findAllById(ids);
+		if (users.size() != ids.size()) {
+			throw new RuntimeException("One or more Option IDs not found!");
+		}
+		userRepository.deleteAll(users);
+	}
+
+
 	public List<UserListDTO> convertToDto(List<User> users) {
 		List<UserListDTO> userDTOs = new ArrayList<>();
 		for (User user : users) {

@@ -6,6 +6,7 @@ import javax.validation.Valid;
 import com.fpt.annotation.CurrentUserId;
 import com.fpt.dto.*;
 import com.fpt.dto.filter.ProductFilter;
+import com.fpt.entity.UserStatus;
 import com.fpt.form.ChangePasswordForm;
 import com.fpt.payload.PaginatedResponse;
 import com.fpt.payload.SuccessNoResponse;
@@ -30,14 +31,14 @@ import java.util.Map;
 
 @CrossOrigin("*")
 @RestController
-@RequestMapping(value = "/api/v1/admin")
-@PreAuthorize("hasRole('ADMIN')")
+@RequestMapping(value = "/api/v1/account")
+//@PreAuthorize("hasRole('ADMIN')")
 @Validated
 public class AdminController {
 
     @Autowired
     private IUserService userService;
-    @GetMapping("/list")
+    @GetMapping
     public ResponseEntity<PaginatedResponse<UserListDTO>> getAllUsers(
             Pageable pageable,
             @RequestParam(required = false) String search,
@@ -50,16 +51,44 @@ public class AdminController {
         PaginatedResponse<UserListDTO> response = new PaginatedResponse<>(
                 dtoPage,
                 HttpServletResponse.SC_OK,
-                "Lấy danh sách người dùng thành công"
+                "Get list user successfully"
         );
 
         return ResponseEntity.ok(response);
     }
+    @PostMapping
+    public ResponseEntity<SuccessResponse<UserDTO>> createUser(@RequestBody @Valid UserDTO userDTO) {
+        UserDTO createdUser = userService.addUserByAdmin(userDTO);
+        return ResponseEntity.ok(new SuccessResponse<>(200, "User created successfully", createdUser));
+    }
+
+
+    @PutMapping("/{id}")
+    public ResponseEntity<SuccessResponse<UserDTO>> updateUser(
+            @PathVariable Long id,
+            @RequestBody @Valid UserDTO userDTO
+    ) {
+        UserDTO updatedUser = userService.updateUserByAdmin(id, userDTO);
+        return ResponseEntity.ok(new SuccessResponse<>(200, "User updated successfully", updatedUser));
+    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<SuccessNoResponse> delete(@PathVariable Long id) {
+        userService.delete(id);
+        return ResponseEntity.ok(new SuccessNoResponse(200, "Delete successfully!"));
+    }
+
+    @DeleteMapping
+    public ResponseEntity<SuccessNoResponse> deleteMany(@RequestBody List<Long> ids) {
+        userService.deleteMany(ids);
+        return ResponseEntity.ok(new SuccessNoResponse(200, "Delete successfully!"));
+    }
+
+
     @PatchMapping("/ban/{id}")
     public ResponseEntity<SuccessNoResponse> toggleBanUser(@PathVariable Long id) {
         try {
             boolean isActive = userService.updateActiveStatus(id);
-            String message = isActive ? "Đã mở khóa tài khoản" : "Đã khóa tài khoản";
+            String message = isActive ? "Unbanned account" : "Banned account";
 
             return ResponseEntity.ok(new SuccessNoResponse(200, message));
         } catch (Exception e) {
@@ -76,12 +105,12 @@ public class AdminController {
             userService.changePasswordAdmin(userId, request);
             Map<String, Object> response = new HashMap<>();
             response.put("code", HttpStatus.OK.value());
-            response.put("message", "Đổi mật khẩu thành công");
+            response.put("message", "Change password successfully");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             Map<String, Object> response = new HashMap<>();
             response.put("code", HttpStatus.BAD_REQUEST.value());
-            response.put("message", "Đổi mật khẩu thất bại: " + e.getMessage());
+            response.put("message", "Change password failed: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
 

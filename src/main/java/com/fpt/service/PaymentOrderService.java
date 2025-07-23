@@ -211,6 +211,7 @@ public class PaymentOrderService implements IPaymentOrderService {
 
         if (subscription != null) {
             List<OptionDTO> optionDTOs = subscription.getOptions().stream()
+                    .filter(option -> Boolean.TRUE.equals(option.getIsActive()))
                     .map(option -> OptionDTO.builder()
                             .id(option.getId())
                             .name(option.getName())

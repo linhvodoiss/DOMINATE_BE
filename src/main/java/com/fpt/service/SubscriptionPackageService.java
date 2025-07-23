@@ -38,14 +38,16 @@ private ModelMapper modelMapper;
     public Page<SubscriptionPackageDTO> getAllPackage(Pageable pageable, String search, Boolean isActive, Double minPrice,Double maxPrice,SubscriptionPackage.TypePackage type,SubscriptionPackage.BillingCycle cycle) {
         SubscriptionPackageSpecificationBuilder specification = new SubscriptionPackageSpecificationBuilder(search,isActive,minPrice,maxPrice,type,cycle);
         return repository.findAll(specification.build(), pageable)
-                .map(subscription -> modelMapper.map(subscription, SubscriptionPackageDTO.class));
+                .map(this::toDto);
+//                .map(subscription -> modelMapper.map(subscription, SubscriptionPackageDTO.class));
     }
 
     @Override
     public Page<SubscriptionPackageDTO> getAllPackageCustomer( Pageable pageable, String search, Double minPrice,Double maxPrice,SubscriptionPackage.TypePackage type,SubscriptionPackage.BillingCycle cycle) {
         SubscriptionPackageSpecificationBuilder specification = new SubscriptionPackageSpecificationBuilder(search,true,minPrice,maxPrice,type,cycle);
         return repository.findAll(specification.build(), pageable)
-                .map(subscription -> modelMapper.map(subscription, SubscriptionPackageDTO.class));
+                .map(this::toDto);
+//                .map(subscription -> modelMapper.map(subscription, SubscriptionPackageDTO.class));
     }
 
     @Override
@@ -89,19 +91,20 @@ private ModelMapper modelMapper;
         entity.setIsActive(dto.getIsActive());
         entity.setSimulatedCount(dto.getSimulatedCount());
 
-        if (dto.getOptions() != null && !dto.getOptions().isEmpty()) {
-            List<Option> options = dto.getOptions().stream()
-                    .map(optionDTO -> optionRepository.findById(optionDTO.getId())
-                            .orElseThrow(() -> new RuntimeException("Option not found with ID: " + optionDTO.getId())))
-                    .collect(Collectors.toList());
-
+        if (dto.getOptionsId() != null && !dto.getOptionsId().isEmpty()) {
+            List<Option> options = optionRepository.findAllById(dto.getOptionsId());
+            if (options.size() != dto.getOptionsId().size()) {
+                throw new RuntimeException("Some Option IDs not found!");
+            }
             entity.setOptions(options);
         } else {
             entity.setOptions(null);
         }
 
+
         return toDto(repository.save(entity));
     }
+
 
 
 
@@ -109,25 +112,51 @@ private ModelMapper modelMapper;
     public void delete(Long id) {
         SubscriptionPackage subscription = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Subscription not found"));
-        subscription.setIsActive(false);
-        repository.save(subscription);
+        repository.delete(subscription);
     }
+
 
     @Override
     public void deleteMore(List<Long> ids) {
         List<SubscriptionPackage> packages = repository.findAllById(ids);
-        for (SubscriptionPackage p : packages) {
-            p.setIsActive(false);
-        }
-        repository.saveAll(packages);
+        repository.deleteAll(packages);
     }
+
+
+    @Override
+    public SubscriptionPackageDTO create(SubscriptionPackageDTO dto) {
+        SubscriptionPackage entity = new SubscriptionPackage();
+        entity.setName(dto.getName());
+        entity.setPrice(dto.getPrice());
+        entity.setDiscount(dto.getDiscount());
+        entity.setBillingCycle(SubscriptionPackage.BillingCycle.valueOf(dto.getBillingCycle()));
+        entity.setTypePackage(SubscriptionPackage.TypePackage.valueOf(dto.getTypePackage()));
+        entity.setSimulatedCount(0L);
+
+        if (dto.getOptionsId() != null && !dto.getOptionsId().isEmpty()) {
+            List<Option> options = optionRepository.findAllById(dto.getOptionsId());
+            if (options.size() != dto.getOptionsId().size()) {
+                throw new RuntimeException("One or more options not found");
+            }
+            entity.setOptions(options);
+        }
+
+
+        SubscriptionPackage saved = repository.save(entity);
+        return toDto(saved);
+    }
+
 
 
     private SubscriptionPackageDTO toDto(SubscriptionPackage entity) {
         List<OptionDTO> optionDTOs = entity.getOptions().stream()
+                .filter(option -> Boolean.TRUE.equals(option.getIsActive()))
                 .map(option -> OptionDTO.builder()
                         .id(option.getId())
                         .name(option.getName())
+                        .isActive(option.getIsActive())
+                        .createdAt(option.getCreatedAt())
+                        .updatedAt(option.getUpdatedAt())
                         .build())
                 .collect(Collectors.toList());
 
@@ -145,26 +174,5 @@ private ModelMapper modelMapper;
                 .updatedAt(entity.getUpdatedAt())
                 .build();
     }
-
-
-
-
-//    private SubscriptionPackage toEntity(SubscriptionPackageDTO dto) {
-//        Set<Option> optionEntities = dto.getOptions()
-//                .stream()
-//                .map(name -> optionRepository.findById(name)
-//                        .orElseThrow(() -> new RuntimeException("Option not found: " + name)))
-//                .collect(Collectors.toSet());
-//
-//        return SubscriptionPackage.builder()
-//                .name(dto.getName())
-//                .price(dto.getPrice())
-//                .discount(dto.getDiscount())
-//                .billingCycle(SubscriptionPackage.BillingCycle.valueOf(dto.getBillingCycle()))
-//                .isActive(dto.getIsActive())
-//                .options(optionEntities)
-//                .simulatedCount(dto.getSimulatedCount())
-//                .build();
-//    }
 
 }

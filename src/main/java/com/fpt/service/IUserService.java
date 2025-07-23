@@ -16,7 +16,10 @@ import java.util.List;
 public interface IUserService extends UserDetailsService {
 
 	Page<User> getAllUser(Pageable pageable, String search, Integer status);
-
+	UserDTO addUserByAdmin(UserDTO dto);
+	UserDTO updateUserByAdmin(Long userId, UserDTO dto);
+	void delete(Long id);
+	void deleteMany(List<Long> ids);
 	void createUser(User user);
 
 	User findUserByEmail(String email);

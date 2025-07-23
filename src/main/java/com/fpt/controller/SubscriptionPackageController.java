@@ -7,6 +7,7 @@ import com.fpt.dto.UserListDTO;
 import com.fpt.entity.SubscriptionPackage;
 import com.fpt.entity.User;
 import com.fpt.payload.PaginatedResponse;
+import com.fpt.payload.SuccessNoResponse;
 import com.fpt.payload.SuccessResponse;
 import com.fpt.service.ISubscriptionPackageService;
 import lombok.RequiredArgsConstructor;
@@ -72,34 +73,53 @@ public class SubscriptionPackageController {
         SubscriptionPackageDTO dto = service.getById(id);
         SuccessResponse<SubscriptionPackageDTO> response = new SuccessResponse<>(
                 HttpServletResponse.SC_OK,
-                "Lấy gói đăng ký thành công",
+                "Take detail package successfully!",
                 dto
         );
         return ResponseEntity.ok(response);
     }
 
-//    @PostMapping
-//    public SubscriptionPackageDTO create(@RequestBody SubscriptionPackageDTO dto) {
-//        return service.create(dto);
-//    }
-
-    @PutMapping("/{id}")
-    public SubscriptionPackageDTO update(@PathVariable Long id, @RequestBody SubscriptionPackageDTO dto) {
-        return service.update(id, dto);
-    }
-
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
-        service.delete(id);
-    }
-    @DeleteMapping()
-    public ResponseEntity<?> deleteMore(@RequestBody List<Long> ids) {
+    @PostMapping
+    public ResponseEntity<SuccessResponse<SubscriptionPackageDTO>> create(@RequestBody SubscriptionPackageDTO dto) {
         try {
-            service.deleteMore(ids);
-            return ResponseEntity.ok(Map.of("code", 200, "message", "Delete packages successfully!"));
+            SubscriptionPackageDTO saved = service.create(dto);
+            return ResponseEntity.ok(new SuccessResponse<>(200, "Create successfully!", saved));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("code", 500, "message", "Delete packages failed!"));
+            return ResponseEntity.status(500).body(new SuccessResponse<>(500, "Create failed!", null));
         }
     }
+
+
+    @PutMapping("/{id}")
+    public ResponseEntity<SuccessResponse<SubscriptionPackageDTO>> update(@PathVariable Long id, @RequestBody SubscriptionPackageDTO dto) {
+        try {
+            SubscriptionPackageDTO updated = service.update(id, dto);
+            return ResponseEntity.ok(new SuccessResponse<>(200, "Update successfully!", updated));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(new SuccessResponse<>(500, "Update failed!", null));
+        }
+    }
+
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<SuccessNoResponse> delete(@PathVariable Long id) {
+        try {
+            service.delete(id);
+            return ResponseEntity.ok(new SuccessNoResponse(200, "Delete successfully!"));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(new SuccessNoResponse(500, "Delete failed!"));
+        }
+    }
+
+    @DeleteMapping
+    public ResponseEntity<SuccessNoResponse> deleteMore(@RequestBody List<Long> ids) {
+        try {
+            service.deleteMore(ids);
+            return ResponseEntity.ok(new SuccessNoResponse(200, "Delete successfully!"));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(new SuccessNoResponse(500, "Delete failed!"));
+        }
+    }
+
 
 }

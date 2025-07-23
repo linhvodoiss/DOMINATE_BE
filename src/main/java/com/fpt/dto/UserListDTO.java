@@ -19,12 +19,12 @@ public class UserListDTO extends RepresentationModel<UserListDTO> {
 	private String firstName;
 
 	private String lastName;
-
+	private String avatarUrl;
 	private String phoneNumber;
 	private Boolean isActive;
 	private Role role;
 
 	public User toEntity() {
-		return new User(userName, email, firstName, lastName, phoneNumber,isActive,id,role);
+		return new User(userName, email, firstName, lastName, phoneNumber,isActive,id,role,avatarUrl);
 	}
 }

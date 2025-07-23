@@ -95,7 +95,7 @@ public class User implements Serializable {
 		this.avatarUrl = avatarUrl;
 	}
 
-	public User(String userName, String email, String password, String firstName, String lastName, String phoneNumber, Boolean isActive, Long id, Role role) {
+	public User(String userName, String email, String password, String firstName, String lastName, String phoneNumber, Boolean isActive, Long id, Role role,String avatarUrl) {
 		this.userName = userName;
 		this.role = role;
 		this.email = email;
@@ -105,9 +105,10 @@ public class User implements Serializable {
 		this.phoneNumber = phoneNumber;
 		this.isActive = isActive;
 		this.id=id;
+		this.avatarUrl = avatarUrl;
 	}
 
-	public User(String userName, String email, String firstName, String lastName, String phoneNumber, Boolean isActive, Long id, Role role) {
+	public User(String userName, String email, String firstName, String lastName, String phoneNumber, Boolean isActive, Long id, Role role,String avatarUrl) {
 		this.userName = userName;
 		this.role = role;
 		this.email = email;
@@ -116,6 +117,7 @@ public class User implements Serializable {
 		this.phoneNumber = phoneNumber;
 		this.isActive = isActive;
 		this.id=id;
+		this.avatarUrl = avatarUrl;
 	}
 
 }
