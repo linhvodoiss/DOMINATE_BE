@@ -16,12 +16,10 @@ import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.Formula;
+import org.hibernate.annotations.*;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Table(name = "`User`")
@@ -29,6 +27,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@SQLDelete(sql = "UPDATE `User` SET is_deleted = true WHERE id = ?")
+@Where(clause = "is_deleted = false")
 public class User implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -66,6 +66,9 @@ public class User implements Serializable {
 	@Column(name = "`status`", nullable = false)
 	private UserStatus status = UserStatus.NOT_ACTIVE;
 	private Boolean isActive = true;
+	@Column(name = "is_deleted", nullable = false)
+	private Boolean isDeleted = false;
+
 	@Column(name = "avatarUrl")
 	private String avatarUrl;
 

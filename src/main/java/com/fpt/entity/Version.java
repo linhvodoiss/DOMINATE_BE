@@ -1,7 +1,9 @@
 package com.fpt.entity;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -13,6 +15,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@SQLDelete(sql = "UPDATE `Version` SET is_deleted = true WHERE id = ?")
+@Where(clause = "is_deleted = false")
 public class Version {
 
     @Id
@@ -23,6 +27,8 @@ public class Version {
     private String version;
 
     private String description;
+    @Column(name = "is_deleted", nullable = false)
+    private Boolean isDeleted = false;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

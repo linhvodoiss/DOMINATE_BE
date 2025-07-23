@@ -87,11 +87,23 @@ private ModelMapper modelMapper;
         entity.setDiscount(dto.getDiscount());
         entity.setBillingCycle(SubscriptionPackage.BillingCycle.valueOf(dto.getBillingCycle()));
         entity.setIsActive(dto.getIsActive());
-//        entity.setOptions(dto.getOptions());
         entity.setSimulatedCount(dto.getSimulatedCount());
+
+        if (dto.getOptions() != null && !dto.getOptions().isEmpty()) {
+            List<Option> options = dto.getOptions().stream()
+                    .map(optionDTO -> optionRepository.findById(optionDTO.getId())
+                            .orElseThrow(() -> new RuntimeException("Option not found with ID: " + optionDTO.getId())))
+                    .collect(Collectors.toList());
+
+            entity.setOptions(options);
+        } else {
+            entity.setOptions(null);
+        }
 
         return toDto(repository.save(entity));
     }
+
+
 
     @Override
     public void delete(Long id) {

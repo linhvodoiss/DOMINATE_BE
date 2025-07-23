@@ -1,7 +1,9 @@
 package com.fpt.entity;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -14,6 +16,8 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@SQLDelete(sql = "UPDATE `SubscriptionPackage` SET is_deleted = true WHERE id = ?")
+@Where(clause = "is_deleted = false")
 public class SubscriptionPackage {
 
     @Id
@@ -33,7 +37,10 @@ public class SubscriptionPackage {
     @Enumerated(EnumType.STRING)
     private TypePackage typePackage;
 
+
     private Boolean isActive = true;
+    @Column(name = "is_deleted", nullable = false)
+    private Boolean isDeleted = false;
 
     @ManyToMany
     @JoinTable(
