@@ -42,9 +42,10 @@ public class AdminController {
     public ResponseEntity<PaginatedResponse<UserListDTO>> getAllUsers(
             Pageable pageable,
             @RequestParam(required = false) String search,
-            @RequestParam(required = false) Integer status
+            @RequestParam(required = false) Integer status,
+            @RequestParam(required = false) Boolean isActive
     ) {
-        Page<User> entityPages = userService.getAllUser(pageable, search, status);
+        Page<User> entityPages = userService.getAllUser(pageable, search, status,isActive);
         List<UserListDTO> dtos = userService.convertToDto(entityPages.getContent());
         Page<UserListDTO> dtoPage = new PageImpl<>(dtos, pageable, entityPages.getTotalElements());
 

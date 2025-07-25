@@ -5,6 +5,7 @@ import com.fpt.dto.PayOSDTO;
 import com.fpt.dto.PaymentOrderDTO;
 import com.fpt.dto.SubscriptionPackageDTO;
 import com.fpt.entity.PaymentOrder;
+import com.fpt.entity.SubscriptionPackage;
 import com.fpt.form.OrderFormCreating;
 import com.fpt.payload.PaginatedResponse;
 import com.fpt.payload.SuccessNoResponse;
@@ -44,9 +45,10 @@ public class PaymentOrderController {
             @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) Long subscriptionId,
-            @RequestParam(required = false) PaymentOrder.PaymentStatus status
+            @RequestParam(required = false) PaymentOrder.PaymentStatus status,
+            @RequestParam(required = false) SubscriptionPackage.TypePackage type
     ) {
-        Page<PaymentOrderDTO> dtoPage = service.getAllPackage(pageable, search,subscriptionId, status);
+        Page<PaymentOrderDTO> dtoPage = service.getAllPackage(pageable, search,subscriptionId, status,type);
         PaginatedResponse<PaymentOrderDTO> response = new PaginatedResponse<>(dtoPage, HttpServletResponse.SC_OK, "Lấy danh sách các đơn hàng trên hệ thống thành công");
         return ResponseEntity.ok(response);
     }
@@ -149,8 +151,10 @@ public class PaymentOrderController {
     @GetMapping("/user/{userId}")
     public ResponseEntity<PaginatedResponse<PaymentOrderDTO>> getByUserId( @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable,@PathVariable Long userId,            @RequestParam(required = false) String search,
                                                              @RequestParam(required = false) Long subscriptionId,
-                                                             @RequestParam(required = false) PaymentOrder.PaymentStatus status) {
-        Page<PaymentOrderDTO> dtoPage = service.getUserPackage(pageable, search,subscriptionId, status,userId);
+                                                             @RequestParam(required = false) PaymentOrder.PaymentStatus status,
+                                                                           @RequestParam(required = false) SubscriptionPackage.TypePackage type
+    ) {
+        Page<PaymentOrderDTO> dtoPage = service.getUserPackage(pageable, search,subscriptionId, status,userId,type);
         PaginatedResponse<PaymentOrderDTO> response = new PaginatedResponse<>(dtoPage, HttpServletResponse.SC_OK, "Lấy danh sách đơn hàng của bạn thành công");
         return ResponseEntity.ok(response);
     }

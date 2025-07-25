@@ -35,7 +35,7 @@ public class UserDTO extends RepresentationModel<UserDTO> {
 	private LocalDateTime updatedAt;
 
 	public User toEntity() {
-		return new User(userName, email, password, firstName, lastName, phoneNumber,isActive,id,role,avatarUrl);
+		return new User(userName, email, password, firstName, lastName, phoneNumber,isActive,id,role,avatarUrl,status);
 	}
 
 }

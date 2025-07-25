@@ -31,7 +31,7 @@ public class PaymentOrder {
 
     @Column(unique = true, nullable = false)
     private Integer orderId;
-
+    private Float price;
     private String paymentLink;
 
     @Column(name = "payos_bin")

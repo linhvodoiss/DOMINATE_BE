@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 public class PaymentOrderDTO {
     private Long id;
     private Integer orderId;
+    private Float price;
     private String paymentLink;
     private String bin;
     private String accountName;

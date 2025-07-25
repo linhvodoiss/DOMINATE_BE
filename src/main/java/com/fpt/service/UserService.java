@@ -12,6 +12,8 @@ import com.fpt.exception.AccountBannedException;
 import com.fpt.exception.AccountNotActivatedException;
 import com.fpt.form.ChangePasswordForm;
 import com.fpt.specification.UserSpecificationBuilder;
+import com.fpt.websocket.PaymentSocketService;
+import com.fpt.websocket.UserSocketService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -53,10 +55,16 @@ public class UserService implements IUserService {
 
 	@Autowired
 	private ModelMapper modelMapper;
-
+	private final UserSocketService userSocketService;
+	@Autowired
+	public UserService(UserRepository userRepository, ModelMapper modelMapper, UserSocketService userSocketService) {
+		this.userRepository = userRepository;
+		this.modelMapper = modelMapper;
+		this.userSocketService = userSocketService;
+	}
 	@Override
-	public Page<User> getAllUser(Pageable pageable, String search,Integer status) {
-		UserSpecificationBuilder specification = new UserSpecificationBuilder(search, status);
+	public Page<User> getAllUser(Pageable pageable, String search,Integer status,Boolean isActive) {
+		UserSpecificationBuilder specification = new UserSpecificationBuilder(search, status,isActive);
 		return userRepository.findAll(specification.build(), pageable);
 	}
 
@@ -74,6 +82,7 @@ public class UserService implements IUserService {
 		User user = modelMapper.map(dto, User.class);
 		user.setPassword(passwordEncoder.encode(dto.getPassword()));
 		user.setStatus(UserStatus.ACTIVE);
+		user.setIsActive(true);
 		User saved = userRepository.save(user);
 		return modelMapper.map(saved, UserDTO.class);
 	}
@@ -81,7 +90,6 @@ public class UserService implements IUserService {
 	public UserDTO updateUserByAdmin(Long userId, UserDTO dto) {
 		User user = userRepository.findById(userId)
 				.orElseThrow(() -> new IllegalArgumentException("User is not exist"));
-
 
 		if (!user.getEmail().equals(dto.getEmail()) && userRepository.existsByEmail(dto.getEmail())) {
 			throw new IllegalArgumentException("Email is exist");
@@ -92,6 +100,10 @@ public class UserService implements IUserService {
 		if (!user.getPhoneNumber().equals(dto.getPhoneNumber()) && userRepository.existsByPhoneNumber(dto.getPhoneNumber())) {
 			throw new IllegalArgumentException("Phone number is exist");
 		}
+
+
+		boolean statusChanged = !user.getStatus().equals(dto.getStatus());
+		boolean isActiveChanged = !user.getIsActive().equals(dto.getIsActive());
 
 		user.setFirstName(dto.getFirstName());
 		user.setLastName(dto.getLastName());
@@ -105,8 +117,15 @@ public class UserService implements IUserService {
 		user.setUpdatedAt(LocalDateTime.now());
 
 		User saved = userRepository.save(user);
+
+		// Send socket
+		if (statusChanged || isActiveChanged) {
+			userSocketService.sendUserStatusUpdate(userId);
+		}
+
 		return modelMapper.map(saved, UserDTO.class);
 	}
+
 
 	@Override
 	public void delete(Long id) {
@@ -114,6 +133,7 @@ public class UserService implements IUserService {
 			throw new RuntimeException("Option not found with id: " + id);
 		}
 		userRepository.deleteById(id);
+		userSocketService.sendUserStatusUpdate(id);
 	}
 	@Override
 	public void deleteMany(List<Long> ids) {
@@ -122,6 +142,9 @@ public class UserService implements IUserService {
 			throw new RuntimeException("One or more Option IDs not found!");
 		}
 		userRepository.deleteAll(users);
+		for (User user : users) {
+			userSocketService.sendUserStatusUpdate(user.getId());
+		}
 	}
 
 

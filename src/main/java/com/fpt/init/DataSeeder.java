@@ -103,6 +103,7 @@ public class DataSeeder implements CommandLineRunner {
                     .user(userRepository.findById(1L).orElse(null))
                     .subscriptionPackage(subscriptionPackageRepository.findById(2L).orElse(null))
                     .orderId(123456)
+                    .price(4000f)
                     .paymentLink("https://payment.example.com/checkout/ORDER-123456")
                     .paymentStatus(PaymentOrder.PaymentStatus.SUCCESS)
                     .paymentMethod(PaymentOrder.PaymentMethod.BANK)

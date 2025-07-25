@@ -10,18 +10,19 @@ import javax.validation.constraints.NotNull;
 @Data
 public class OrderFormCreating {
 
-    @NotNull(message = "Không xác định được đơn hàng")
+    @NotNull(message = "Package is undefined")
     private Long subscriptionId;
 
-    @NotNull(message = "Bạn chưa chọn phương thức thanh toán")
+    @NotNull(message = "Payment method is not blank")
     private PaymentOrder.PaymentMethod paymentMethod;
 
-    @NotNull(message = "Bạn chưa điền link thanh toán")
+    @NotNull(message = "Link payment is not blank")
     private String paymentLink;
-
-    @NotNull(message = "Không được để trống orderId")
-    @Min(value = 10_000_000, message = "orderId phải có 8-9 chữ số")
-    @Max(value = 999_999_999, message = "orderId phải có 8-9 chữ số")
+    @NotNull(message = "Price is not blank")
+    private Float price;
+    @NotNull(message = "Order Id is not blank")
+    @Min(value = 10_000_000, message = "orderId must have 8-9 digit")
+    @Max(value = 999_999_999, message = "orderId must have 8-9 digit")
     private Integer orderId;
     private String bin;
     private String accountName;

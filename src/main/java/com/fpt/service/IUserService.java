@@ -1,6 +1,7 @@
 package com.fpt.service;
 import com.fpt.dto.UserDTO;
 import com.fpt.dto.UserListDTO;
+import com.fpt.entity.UserStatus;
 import com.fpt.form.ChangePasswordForm;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,7 +16,7 @@ import java.util.List;
 
 public interface IUserService extends UserDetailsService {
 
-	Page<User> getAllUser(Pageable pageable, String search, Integer status);
+	Page<User> getAllUser(Pageable pageable, String search, Integer status, Boolean isActive);
 	UserDTO addUserByAdmin(UserDTO dto);
 	UserDTO updateUserByAdmin(Long userId, UserDTO dto);
 	void delete(Long id);

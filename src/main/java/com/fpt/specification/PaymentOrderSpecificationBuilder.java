@@ -2,6 +2,7 @@ package com.fpt.specification;
 
 import com.fpt.entity.PaymentOrder;
 import com.fpt.entity.PaymentOrder.PaymentStatus;
+import com.fpt.entity.SubscriptionPackage;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
 
@@ -11,14 +12,16 @@ public class PaymentOrderSpecificationBuilder {
 	private final PaymentStatus status;
 	private final Long subscriptionId;
 	private final Long userId;
-	public PaymentOrderSpecificationBuilder(String search, Long subscriptionId, PaymentStatus status,Long userId) {
+	private final SubscriptionPackage.TypePackage type;
+	public PaymentOrderSpecificationBuilder(String search, Long subscriptionId, PaymentStatus status,Long userId,SubscriptionPackage.TypePackage type) {
 		this.search = search;
 		this.status = status;
 		this.subscriptionId = subscriptionId;
 		this.userId = userId;
+		this.type=type;
 	}
-	public PaymentOrderSpecificationBuilder(String search, Long subscriptionId, PaymentStatus status) {
-		this(search, subscriptionId, status, null);
+	public PaymentOrderSpecificationBuilder(String search, Long subscriptionId, PaymentStatus status,SubscriptionPackage.TypePackage type) {
+		this(search, subscriptionId, status, null,type);
 	}
 
 	public Specification<PaymentOrder> build() {
@@ -53,6 +56,9 @@ public class PaymentOrderSpecificationBuilder {
 		// Filter by subscriptionId (foreign key)
 		if (subscriptionId != null) {
 			spec = spec.and((root, query, cb) -> cb.equal(root.get("subscriptionPackage").get("id"), subscriptionId));
+		}
+		if (type != null) {
+			spec = spec.and((root, query, cb) -> cb.equal(root.get("subscriptionPackage").get("typePackage"), type));
 		}
 		if (userId != null) {
 			spec = spec.and((root, query, cb) -> cb.equal(root.get("user").get("id"), userId));

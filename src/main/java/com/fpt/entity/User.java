@@ -80,7 +80,7 @@ public class User implements Serializable {
 	private LocalDateTime updatedAt;
 
 
-	public User(Long id, String userName, String email, String password, String firstName, String lastName, String phoneNumber, String fullName, Role role, UserStatus status, Boolean isActive, String avatarUrl) {
+	public User(Long id, String userName, String email, String password, String firstName, String lastName, String phoneNumber, String fullName, Role role, UserStatus status, Boolean isActive, String avatarUrl,LocalDateTime createdAt,LocalDateTime updatedAt) {
 		this.id = id;
 		this.userName = userName;
 		this.email = email;
@@ -93,9 +93,11 @@ public class User implements Serializable {
 		this.status = status;
 		this.isActive = isActive;
 		this.avatarUrl = avatarUrl;
+		this.createdAt=createdAt;
+		this.updatedAt=updatedAt;
 	}
 
-	public User(String userName, String email, String password, String firstName, String lastName, String phoneNumber, Boolean isActive, Long id, Role role,String avatarUrl) {
+	public User(String userName, String email, String password, String firstName, String lastName, String phoneNumber, Boolean isActive, Long id, Role role,String avatarUrl, UserStatus status) {
 		this.userName = userName;
 		this.role = role;
 		this.email = email;
@@ -106,9 +108,10 @@ public class User implements Serializable {
 		this.isActive = isActive;
 		this.id=id;
 		this.avatarUrl = avatarUrl;
+		this.status = status;
 	}
 
-	public User(String userName, String email, String firstName, String lastName, String phoneNumber, Boolean isActive, Long id, Role role,String avatarUrl) {
+	public User(String userName, String email, String firstName, String lastName, String phoneNumber, Boolean isActive, Long id, Role role,String avatarUrl, UserStatus status,LocalDateTime createdAt,LocalDateTime updatedAt) {
 		this.userName = userName;
 		this.role = role;
 		this.email = email;
@@ -118,6 +121,9 @@ public class User implements Serializable {
 		this.isActive = isActive;
 		this.id=id;
 		this.avatarUrl = avatarUrl;
+		this.status = status;
+		this.createdAt=createdAt;
+		this.updatedAt=updatedAt;
 	}
 
 }

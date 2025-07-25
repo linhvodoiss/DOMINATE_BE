@@ -40,15 +40,15 @@ public class PaymentOrderService implements IPaymentOrderService {
     @Autowired
     private PaymentSocketService paymentSocketService;
     @Override
-    public Page<PaymentOrderDTO> getAllPackage(Pageable pageable, String search,Long subscriptionId, PaymentOrder.PaymentStatus status) {
-        PaymentOrderSpecificationBuilder specification = new PaymentOrderSpecificationBuilder(search,subscriptionId,status);
+    public Page<PaymentOrderDTO> getAllPackage(Pageable pageable, String search,Long subscriptionId, PaymentOrder.PaymentStatus status,SubscriptionPackage.TypePackage type) {
+        PaymentOrderSpecificationBuilder specification = new PaymentOrderSpecificationBuilder(search,subscriptionId,status,type);
         return repository.findAll(specification.build(), pageable).map(this::toDto);
 //                .map(subscription -> modelMapper.map(subscription, PaymentOrderDTO.class));
     }
 
     @Override
-    public Page<PaymentOrderDTO> getUserPackage(Pageable pageable, String search, Long subscriptionId, PaymentOrder.PaymentStatus status, Long userId) {
-        PaymentOrderSpecificationBuilder specification = new PaymentOrderSpecificationBuilder(search,subscriptionId,status,userId);
+    public Page<PaymentOrderDTO> getUserPackage(Pageable pageable, String search, Long subscriptionId, PaymentOrder.PaymentStatus status, Long userId,SubscriptionPackage.TypePackage type) {
+        PaymentOrderSpecificationBuilder specification = new PaymentOrderSpecificationBuilder(search,subscriptionId,status,userId,type);
         return repository.findAll(specification.build(), pageable).map(this::toDto);
 //                .map(subscription -> modelMapper.map(subscription, PaymentOrderDTO.class));
     }
@@ -78,6 +78,7 @@ public class PaymentOrderService implements IPaymentOrderService {
         order.setSubscriptionPackage(subscription);
         order.setOrderId(form.getOrderId());
         order.setPaymentLink(form.getPaymentLink());
+        order.setPrice(form.getPrice());
         order.setBin(form.getBin());
         order.setAccountName(form.getAccountName());
         order.setAccountNumber(form.getAccountNumber());
@@ -281,6 +282,7 @@ public class PaymentOrderService implements IPaymentOrderService {
                 .paymentStatus(entity.getPaymentStatus().name())
                 .paymentMethod(entity.getPaymentMethod().name())
                 .licenseCreated(entity.getLicenseCreated())
+                .price(entity.getPrice())
                 .canReport(canReport)
                 .userId(entity.getUser().getId())
                 .subscriptionId(subscription != null ? subscription.getId() : null)
@@ -301,6 +303,7 @@ public class PaymentOrderService implements IPaymentOrderService {
                 .paymentStatus(PaymentOrder.PaymentStatus.valueOf(dto.getPaymentStatus()))
                 .paymentMethod(PaymentOrder.PaymentMethod.valueOf(dto.getPaymentMethod()))
                 .licenseCreated(dto.getLicenseCreated())
+                .price(dto.getPrice())
                 .bin(dto.getBin())
                 .accountName(dto.getAccountName())
                 .accountNumber(dto.getAccountNumber())
