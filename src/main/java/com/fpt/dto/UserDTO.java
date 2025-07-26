@@ -1,7 +1,10 @@
 package com.fpt.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fpt.entity.Role;
 import com.fpt.entity.UserStatus;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import org.springframework.hateoas.RepresentationModel;
 
 import com.fpt.entity.User;
@@ -13,6 +16,9 @@ import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserDTO extends RepresentationModel<UserDTO> {
 
 	private Long id;

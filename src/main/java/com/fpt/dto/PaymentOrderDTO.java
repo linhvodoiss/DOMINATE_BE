@@ -27,6 +27,7 @@ public class PaymentOrderDTO {
     private LocalDateTime updatedAt;
     private Boolean canReport;
     private SubscriptionPackageDTO subscription;
+    private UserDTO buyer;
 }
 
 

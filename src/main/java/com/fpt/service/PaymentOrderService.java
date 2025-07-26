@@ -1,9 +1,6 @@
 package com.fpt.service;
 
-import com.fpt.dto.LicenseDTO;
-import com.fpt.dto.OptionDTO;
-import com.fpt.dto.PaymentOrderDTO;
-import com.fpt.dto.SubscriptionPackageDTO;
+import com.fpt.dto.*;
 import com.fpt.entity.*;
 import com.fpt.form.OrderFormCreating;
 import com.fpt.repository.LicenseRepository;
@@ -216,6 +213,9 @@ public class PaymentOrderService implements IPaymentOrderService {
                     .map(option -> OptionDTO.builder()
                             .id(option.getId())
                             .name(option.getName())
+                            .isActive(option.getIsActive())
+                            .createdAt(option.getCreatedAt())
+                            .updatedAt(option.getUpdatedAt())
                             .build())
                     .toList();
 
@@ -231,6 +231,18 @@ public class PaymentOrderService implements IPaymentOrderService {
                     .simulatedCount(subscription.getSimulatedCount())
                     .createdAt(subscription.getCreatedAt())
                     .updatedAt(subscription.getUpdatedAt())
+                    .build();
+        }
+        User user = entity.getUser();
+        UserDTO buyerDto = null;
+        if (user != null) {
+            buyerDto = UserDTO.builder()
+                    .id(user.getId())
+                    .userName(user.getUserName())
+                    .email(user.getEmail())
+                    .firstName(user.getFirstName())
+                    .lastName(user.getLastName())
+                    .phoneNumber(user.getPhoneNumber())
                     .build();
         }
         LicenseDTO licenseDto = null;
@@ -284,7 +296,8 @@ public class PaymentOrderService implements IPaymentOrderService {
                 .licenseCreated(entity.getLicenseCreated())
                 .price(entity.getPrice())
                 .canReport(canReport)
-                .userId(entity.getUser().getId())
+                .userId(user != null ? user.getId() : null)
+                .buyer(buyerDto)
                 .subscriptionId(subscription != null ? subscription.getId() : null)
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
