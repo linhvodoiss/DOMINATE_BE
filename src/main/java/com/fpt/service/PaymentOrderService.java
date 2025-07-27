@@ -19,8 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +36,7 @@ public class PaymentOrderService implements IPaymentOrderService {
     private ModelMapper modelMapper;
     @Autowired
     private PaymentSocketService paymentSocketService;
+
     @Override
     public Page<PaymentOrderDTO> getAllPackage(Pageable pageable, String search,Long subscriptionId, PaymentOrder.PaymentStatus status,SubscriptionPackage.TypePackage type) {
         PaymentOrderSpecificationBuilder specification = new PaymentOrderSpecificationBuilder(search,subscriptionId,status,type);
@@ -86,6 +87,13 @@ public class PaymentOrderService implements IPaymentOrderService {
         order.setUpdatedAt(LocalDateTime.now());
 
         PaymentOrder savedOrder = repository.save(order);
+        paymentSocketService.notifyNewOrder(
+                savedOrder.getOrderId(),
+                savedOrder.getUser().getUserName(),
+                savedOrder.getCreatedAt().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                savedOrder.getSubscriptionPackage().getName(),
+                savedOrder.getPrice(),
+                savedOrder.getPaymentMethod().name() );
         return toDto(savedOrder);
     }
 
@@ -101,13 +109,13 @@ public class PaymentOrderService implements IPaymentOrderService {
             order.setUpdatedAt(LocalDateTime.now());
             return repository.save(order);
         } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Trạng thái không hợp lệ");
+            throw new RuntimeException("Status is invalid");
         }
     }
     @Override
     public PaymentOrder changeStatusOrderByOrderId(Integer orderId, String newStatus) {
         PaymentOrder order = repository.findByOrderId(orderId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với orderId: " + orderId));
+                .orElseThrow(() -> new RuntimeException("Not found order with orderId: " + orderId));
 
         try {
             PaymentOrder.PaymentStatus status = PaymentOrder.PaymentStatus.valueOf(newStatus);
@@ -120,13 +128,33 @@ public class PaymentOrderService implements IPaymentOrderService {
 
             return savedOrder;
         } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Trạng thái không hợp lệ");
+            throw new RuntimeException("Status is invalid");
+        }
+    }
+
+    @Override
+    public PaymentOrder changeStatusOrderByAdmin(Integer orderId, String newStatus) {
+        PaymentOrder order = repository.findByOrderId(orderId)
+                .orElseThrow(() -> new RuntimeException("Not found order with orderId: " + orderId));
+
+        try {
+            PaymentOrder.PaymentStatus status = PaymentOrder.PaymentStatus.valueOf(newStatus);
+            order.setPaymentStatus(status);
+            order.setUpdatedAt(LocalDateTime.now());
+            PaymentOrder savedOrder = repository.save(order);
+
+            // Send Socket
+            paymentSocketService.notifyAdminStatus(orderId, newStatus);
+
+            return savedOrder;
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Status is invalid");
         }
     }
     @Override
     public PaymentOrder changeStatusOrderSilently(Integer orderId, String newStatus) {
         PaymentOrder order = repository.findByOrderId(orderId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với orderId: " + orderId));
+                .orElseThrow(() -> new RuntimeException("Not found order with orderId: " + orderId));
 
         try {
             PaymentOrder.PaymentStatus status = PaymentOrder.PaymentStatus.valueOf(newStatus);
@@ -134,7 +162,7 @@ public class PaymentOrderService implements IPaymentOrderService {
             order.setUpdatedAt(LocalDateTime.now());
             return repository.save(order);
         } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Trạng thái không hợp lệ");
+            throw new RuntimeException("Status is invalid");
         }
     }
 

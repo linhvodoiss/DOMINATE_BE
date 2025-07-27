@@ -84,7 +84,7 @@ public class EmailService implements IEmailService {
 	@Override
 	public void sendEmailForNotificationAdmin(String email, Long packageId, Integer orderId) {
 
-		String confirmationUrl = frontendUrl +"/orders/" + packageId + "?orderId=" + orderId;
+		String confirmationUrl = frontendUrl +"/admin/preview/"  + orderId;
 
 		String subject = "Confirm Your Order "+orderId;
 		String content = "<p>Hello " + ",</p>"
@@ -97,7 +97,7 @@ public class EmailService implements IEmailService {
 	@Override
 	public void sendEmailReport(String email, Long packageId, Integer orderId, String content) {
 
-		String confirmationUrl = frontendUrl +"/orders/" + packageId + "?orderId=" + orderId;
+		String confirmationUrl = frontendUrl +"/admin/preview/"  + orderId;
 
 		String subject = "Report order "+orderId;
 		String contentMess = "<p>Reason: " + content +",</p>"
@@ -117,7 +117,7 @@ public class EmailService implements IEmailService {
 
 			helper.setTo(recipientEmail);
 			helper.setSubject(subject);
-			helper.setText(content, true); // true => nội dung là HTML
+			helper.setText(content, true);
 
 			mailSender.send(message);
 		} catch (MessagingException e) {

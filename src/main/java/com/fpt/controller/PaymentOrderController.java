@@ -71,9 +71,10 @@ public class PaymentOrderController {
             @RequestParam String newStatus) {
         try {
             PaymentOrder updatedOrder = service.changeStatusOrderByOrderId(orderId, newStatus);
+
             return ResponseEntity.ok(new SuccessResponse<>(
                     200,
-                    "Cập nhật trạng thái thành công",
+                    "Update status successfully",
                     updatedOrder.getPaymentStatus().name()
             ));
         } catch (RuntimeException e) {
@@ -84,6 +85,27 @@ public class PaymentOrderController {
             ));
         }
     }
+    @PatchMapping("/admin/{orderId}")
+    public ResponseEntity<SuccessResponse<String>> updateOrderStatusAdmin(
+            @PathVariable Integer orderId,
+            @RequestParam String newStatus) {
+        try {
+            PaymentOrder updatedOrder = service.changeStatusOrderByAdmin(orderId, newStatus);
+
+            return ResponseEntity.ok(new SuccessResponse<>(
+                    200,
+                    "Update status successfully",
+                    updatedOrder.getPaymentStatus().name()
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new SuccessResponse<>(
+                    400,
+                    e.getMessage(),
+                    null
+            ));
+        }
+    }
+
     @PatchMapping("/silent/{orderId}")
     public ResponseEntity<SuccessResponse<String>> updateOrderStatusSilently(
             @PathVariable Integer orderId,
@@ -92,7 +114,7 @@ public class PaymentOrderController {
             PaymentOrder updatedOrder = service.changeStatusOrderSilently(orderId, newStatus);
             return ResponseEntity.ok(new SuccessResponse<>(
                     200,
-                    "Cập nhật trạng thái thành công (không gửi socket)",
+                    "Update status successfully (no socket)",
                     updatedOrder.getPaymentStatus().name()
             ));
         } catch (RuntimeException e) {
@@ -168,7 +190,7 @@ public class PaymentOrderController {
         PaymentOrderDTO dto = service.getByOrderId(id);
         SuccessResponse<PaymentOrderDTO> response = new SuccessResponse<>(
                 200,
-                "Lấy thông tin đơn hàng thành công",
+                "Take data order success.",
                 dto
         );
         return ResponseEntity.ok(response);
