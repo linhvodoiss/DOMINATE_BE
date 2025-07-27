@@ -163,9 +163,9 @@ public class UserService implements IUserService {
 		// encode password
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
 		user.setIsActive(true);
+		user.setStatus(UserStatus.NOT_ACTIVE);
 		// create user
 		userRepository.save(user);
-
 		// create new user registration token
 		createNewRegistrationUserToken(user);
 
