@@ -143,6 +143,7 @@ public class LicenseService implements ILicenseService {
         }
 
         order.setLicenseCreated(true);
+        paymentOrderService.changeStatusOrderByOrderId(form.getOrderId(), "SUCCESS");
         License saved = licenseRepository.save(license);
         return toDtoWithSubscription(saved);
     }
