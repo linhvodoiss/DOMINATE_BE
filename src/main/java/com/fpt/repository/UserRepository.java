@@ -1,5 +1,6 @@
 package com.fpt.repository;
 
+import com.fpt.entity.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -22,4 +23,7 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
 	public User findByUserName(String name);
 	
 	public User findByEmail(String email);
+
+	public Long countByRole(Role role);
+
 }

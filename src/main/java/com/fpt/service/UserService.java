@@ -359,6 +359,9 @@ public class UserService implements IUserService {
 		user.setPassword(passwordEncoder.encode(form.getNewPassword()));
 		userRepository.save(user);
 	}
-
+	@Override
+	public Long countCustomerAccounts() {
+		return userRepository.countByRole(Role.CUSTOMER);
+	}
 
 }

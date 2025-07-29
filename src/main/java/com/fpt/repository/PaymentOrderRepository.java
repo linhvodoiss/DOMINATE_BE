@@ -12,5 +12,12 @@ public interface PaymentOrderRepository extends JpaRepository<PaymentOrder, Long
     List<PaymentOrder> findByUserId(Long userId);
     boolean existsByOrderId(Integer orderId);
     Optional<PaymentOrder> findByOrderId(Integer orderId);
+    Long countByPaymentStatus(PaymentOrder.PaymentStatus status);
+    Long countByPaymentMethod(PaymentOrder.PaymentMethod method);
+
+    List<PaymentOrder> findAllByPaymentMethodAndPaymentStatus(
+            PaymentOrder.PaymentMethod method,
+            PaymentOrder.PaymentStatus status
+    );
 
 }

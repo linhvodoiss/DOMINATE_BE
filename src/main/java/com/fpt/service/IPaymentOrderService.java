@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface IPaymentOrderService {
@@ -29,4 +30,9 @@ public interface IPaymentOrderService {
     PaymentOrderDTO create(PaymentOrderDTO dto);
     PaymentOrderDTO update(Long id, PaymentOrderDTO dto);
     void delete(Long id);
+    Double getTotalRevenue();
+    Long countTotalOrders();
+    Map<String, Long> countOrdersByStatus();
+    Map<String, Long> countOrdersByPaymentMethod();
+    Map<String, Double> revenueByPaymentMethod();
 }

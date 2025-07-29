@@ -11,6 +11,7 @@ import com.fpt.form.ChangePasswordForm;
 import com.fpt.payload.PaginatedResponse;
 import com.fpt.payload.SuccessNoResponse;
 import com.fpt.payload.SuccessResponse;
+import com.fpt.service.IPaymentOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -38,6 +39,8 @@ public class AdminController {
 
     @Autowired
     private IUserService userService;
+    @Autowired
+    private IPaymentOrderService paymentOrderService;
     @GetMapping
     public ResponseEntity<PaginatedResponse<UserListDTO>> getAllUsers(
             Pageable pageable,
@@ -116,6 +119,34 @@ public class AdminController {
         }
 
     }
+    @GetMapping("/dashboard")
+    public ResponseEntity<SuccessResponse<Map<String, Object>>> getAdminDashboard() {
+        long totalCustomers = userService.countCustomerAccounts();
+        long totalOrders = paymentOrderService.countTotalOrders();
+        double totalRevenue = paymentOrderService.getTotalRevenue();
+        Map<String, Long> ordersByStatus = paymentOrderService.countOrdersByStatus();
+
+        Map<String, Long> ordersByPaymentMethod = paymentOrderService.countOrdersByPaymentMethod();
+        Map<String, Double> revenueByPaymentMethod = paymentOrderService.revenueByPaymentMethod();
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("totalCustomers", totalCustomers);
+        data.put("totalOrders", totalOrders);
+        data.put("totalRevenue", totalRevenue);
+        data.put("ordersByStatus", ordersByStatus);
+        data.put("ordersByPaymentMethod", ordersByPaymentMethod);
+        data.put("revenueByPaymentMethod", revenueByPaymentMethod);
+
+        SuccessResponse<Map<String, Object>> response = new SuccessResponse<>(
+                HttpServletResponse.SC_OK,
+                "Get dashboard data successfully",
+                data
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+
 
 
 }

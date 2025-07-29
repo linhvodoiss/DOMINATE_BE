@@ -41,14 +41,14 @@ public class PaymentOrderService implements IPaymentOrderService {
     public Page<PaymentOrderDTO> getAllPackage(Pageable pageable, String search,Long subscriptionId, PaymentOrder.PaymentStatus status,SubscriptionPackage.TypePackage type) {
         PaymentOrderSpecificationBuilder specification = new PaymentOrderSpecificationBuilder(search,subscriptionId,status,type);
         return repository.findAll(specification.build(), pageable).map(this::toDto);
-//                .map(subscription -> modelMapper.map(subscription, PaymentOrderDTO.class));
+
     }
 
     @Override
     public Page<PaymentOrderDTO> getUserPackage(Pageable pageable, String search, Long subscriptionId, PaymentOrder.PaymentStatus status, Long userId,SubscriptionPackage.TypePackage type) {
         PaymentOrderSpecificationBuilder specification = new PaymentOrderSpecificationBuilder(search,subscriptionId,status,userId,type);
         return repository.findAll(specification.build(), pageable).map(this::toDto);
-//                .map(subscription -> modelMapper.map(subscription, PaymentOrderDTO.class));
+
     }
 
     @Override
@@ -352,6 +352,51 @@ public class PaymentOrderService implements IPaymentOrderService {
                 .user(userRepository.findById(dto.getUserId()).orElseThrow())
                 .subscriptionPackage(subscriptionRepository.findById(dto.getSubscriptionId()).orElseThrow())
                 .build();
+    }
+    @Override
+public Double getTotalRevenue() {
+    return repository.findAll().stream()
+            .filter(order -> order.getPaymentStatus() == PaymentOrder.PaymentStatus.SUCCESS)
+            .mapToDouble(PaymentOrder::getPrice)
+            .sum();
+}
+    @Override
+    public Long countTotalOrders() {
+        return repository.count();
+    }
+    @Override
+    public Map<String, Long> countOrdersByStatus() {
+        Map<String, Long> result = new HashMap<>();
+        for (PaymentOrder.PaymentStatus status : PaymentOrder.PaymentStatus.values()) {
+            long count = repository.countByPaymentStatus(status);
+            result.put(status.name(), count);
+        }
+        return result;
+    }
+    @Override
+    public Map<String, Long> countOrdersByPaymentMethod() {
+        Map<String, Long> result = new HashMap<>();
+
+        for (PaymentOrder.PaymentMethod method : PaymentOrder.PaymentMethod.values()) {
+            long count = repository.countByPaymentMethod(method);
+            result.put(method.name(), count);
+        }
+
+        return result;
+    }
+    @Override
+    public Map<String, Double> revenueByPaymentMethod() {
+        Map<String, Double> result = new HashMap<>();
+
+        for (PaymentOrder.PaymentMethod method : PaymentOrder.PaymentMethod.values()) {
+            double sum = repository.findAllByPaymentMethodAndPaymentStatus(method, PaymentOrder.PaymentStatus.SUCCESS)
+                    .stream()
+                    .mapToDouble(PaymentOrder::getPrice)
+                    .sum();
+            result.put(method.name(), sum);
+        }
+
+        return result;
     }
 
 }

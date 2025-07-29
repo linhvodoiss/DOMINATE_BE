@@ -32,6 +32,10 @@ public class ProfileDTO {
 		this.avatarUrl = avatarUrl;
 	}
 
+	public String getPhoneNumber() {
+		return phoneNumber;
+	}
+
 	public String getUserName() {
 		return userName;
 	}
@@ -47,10 +51,7 @@ public class ProfileDTO {
 	public String getLastName() {
 		return lastName;
 	}
-	
-	public String phoneNumber() {
-		return phoneNumber;
-	}
+
 
 	public Role getRole() {
 		return role;

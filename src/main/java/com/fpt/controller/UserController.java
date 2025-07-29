@@ -146,7 +146,7 @@ public class UserController {
 
 	@GetMapping("/profile")
 	// validate: check exists, check not expired
-	public ResponseEntity<?> getUserProfile(Authentication authentication) {
+	public ResponseEntity<SuccessResponse<ProfileDTO>> getUserProfile(Authentication authentication) {
 		
 		// get username from token
 		String username = authentication.getName();
@@ -165,8 +165,8 @@ public class UserController {
         		user.getRole(),
         		user.getStatus().toString(),
         		user.getAvatarUrl());
+		return ResponseEntity.ok(new SuccessResponse<>(200, "Get profile successfully!", profileDto));
 
-		return new ResponseEntity<>(profileDto, HttpStatus.OK);
 	}
 	@PreAuthorize("isAuthenticated()")
 	@PutMapping("/profile")

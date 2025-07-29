@@ -50,4 +50,5 @@ public interface IUserService extends UserDetailsService {
 	Boolean updateActiveStatus(Long userId);
 	UserDTO UpdateUserInformation(Long userId, ChangePublicProfileDTO dto);
 	List<UserListDTO> convertToDto(List<User> data);
+	Long countCustomerAccounts();
 }
