@@ -106,7 +106,7 @@ public class LicenseService implements ILicenseService {
 
     @Override
     public LicenseDTO createLicense(LicenseCreateForm form, String ip) {
-        PaymentOrder order = paymentOrderRepository.findByOrderId(form.getOrderId())
+        PaymentOrder order = paymentOrderRepository.findByOrderIdForUpdate(form.getOrderId())
                 .orElseThrow(() -> new IllegalArgumentException("Not found order."));
 
         if (order.getPaymentStatus() != PaymentOrder.PaymentStatus.SUCCESS) {

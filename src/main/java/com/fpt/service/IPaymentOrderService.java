@@ -1,8 +1,10 @@
 package com.fpt.service;
 
+import com.fpt.dto.LicenseDTO;
 import com.fpt.dto.PaymentOrderDTO;
 import com.fpt.entity.PaymentOrder;
 import com.fpt.entity.SubscriptionPackage;
+import com.fpt.form.LicenseCreateForm;
 import com.fpt.form.OrderFormCreating;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,9 +18,13 @@ public interface IPaymentOrderService {
     Page<PaymentOrderDTO> getUserPackage(Pageable pageable, String search,Long subscriptionId, PaymentOrder.PaymentStatus status, Long userId,SubscriptionPackage.TypePackage type);
     List<PaymentOrderDTO> convertToDto(List<PaymentOrder> paymentOrders);
     PaymentOrderDTO createOrder(OrderFormCreating form, Long userId);
+    void updateOrderFromWebhook(int orderCode, String internalStatus,
+                                String bin, String accountName, String accountNumber, String qrCode,String dateTransfer,String id);
     PaymentOrder changeStatusOrder(Long orderId, String newStatus);
     PaymentOrder changeStatusOrderByAdmin(Integer orderId, String newStatus);
     PaymentOrder changeStatusOrderByOrderId(Integer orderId, String newStatus);
+     LicenseDTO createLicensePayOS(LicenseCreateForm form, String ip);
+    PaymentOrder changeStatusOrderIdCreateLicense(Integer orderId, String newStatus, String ip);
     PaymentOrder changeStatusOrderSilently(Integer orderId, String newStatus);
 
     List<PaymentOrderDTO> getAll();

@@ -22,6 +22,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.List;
@@ -115,6 +117,30 @@ public class PaymentOrderController {
             return ResponseEntity.ok(new SuccessResponse<>(
                     200,
                     "Update status successfully (no socket)",
+                    updatedOrder.getPaymentStatus().name()
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new SuccessResponse<>(
+                    400,
+                    e.getMessage(),
+                    null
+            ));
+        }
+    }
+
+    @PutMapping("/license/{orderId}")
+    public ResponseEntity<SuccessResponse<String>> updateOrderLicense(
+            @PathVariable Integer orderId,
+            @RequestParam String newStatus, HttpServletRequest request) {
+        try {
+            String ip = request.getHeader("X-Forwarded-For");
+            if (ip == null || ip.isBlank()) {
+                ip = request.getRemoteAddr();
+            }
+            PaymentOrder updatedOrder = service.changeStatusOrderIdCreateLicense(orderId, newStatus,ip);
+            return ResponseEntity.ok(new SuccessResponse<>(
+                    200,
+                    "License create successfully",
                     updatedOrder.getPaymentStatus().name()
             ));
         } catch (RuntimeException e) {

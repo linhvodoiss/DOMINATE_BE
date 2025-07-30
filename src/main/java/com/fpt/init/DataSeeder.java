@@ -112,6 +112,7 @@ public class DataSeeder implements CommandLineRunner {
                     .accountName("NGUYEN THI HUONG")
                     .accountNumber("0386331971")
                     .qrCode("00020101021138540010A00000072701240006970415011003863319710208QRIBFTTA53037045802VN63046733")
+                    .dateTransfer("2025-07-30 11:09:43")
                     .isDeleted(false)
                     .build();
 

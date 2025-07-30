@@ -2,6 +2,7 @@ package com.fpt.service;
 
 import com.fpt.dto.*;
 import com.fpt.entity.*;
+import com.fpt.form.LicenseCreateForm;
 import com.fpt.form.OrderFormCreating;
 import com.fpt.repository.LicenseRepository;
 import com.fpt.repository.PaymentOrderRepository;
@@ -77,10 +78,10 @@ public class PaymentOrderService implements IPaymentOrderService {
         order.setOrderId(form.getOrderId());
         order.setPaymentLink(form.getPaymentLink());
         order.setPrice(form.getPrice());
-        order.setBin(form.getBin());
-        order.setAccountName(form.getAccountName());
-        order.setAccountNumber(form.getAccountNumber());
-        order.setQrCode(form.getQrCode());
+//        order.setBin(form.getBin());
+//        order.setAccountName(form.getAccountName());
+//        order.setAccountNumber(form.getAccountNumber());
+//        order.setQrCode(form.getQrCode());
         order.setPaymentMethod(form.getPaymentMethod());
         order.setPaymentStatus(PaymentOrder.PaymentStatus.PENDING);
         order.setCreatedAt(LocalDateTime.now());
@@ -96,6 +97,29 @@ public class PaymentOrderService implements IPaymentOrderService {
                 savedOrder.getPaymentMethod().name() );
         return toDto(savedOrder);
     }
+
+    @Override
+    public void updateOrderFromWebhook(int orderCode, String internalStatus,
+                                       String bin, String accountName, String accountNumber, String qrCode,String dateTransfer, String ip) {
+        PaymentOrder order = repository.findByOrderId(orderCode)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với orderCode: " + orderCode));
+
+        // Update information from webhook
+        if (bin != null) order.setBin(bin);
+        if (accountName != null) order.setAccountName(accountName);
+        if (accountNumber != null) order.setAccountNumber(accountNumber);
+        if (qrCode != null) order.setQrCode(qrCode);
+        if (dateTransfer != null) order.setDateTransfer(dateTransfer);
+        order.setUpdatedAt(LocalDateTime.now());
+
+        // Save information
+        repository.save(order);
+
+        // call service and send socket
+        changeStatusOrderIdCreateLicense(orderCode, internalStatus,ip);
+    }
+
+
 
 
     @Override
@@ -131,6 +155,81 @@ public class PaymentOrderService implements IPaymentOrderService {
             throw new RuntimeException("Status is invalid");
         }
     }
+    private String generateLicenseKey() {
+        return "LIC-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+    }
+
+    @Override
+    public LicenseDTO createLicensePayOS(LicenseCreateForm form, String ip) {
+        PaymentOrder order = repository.findByOrderIdForUpdate(form.getOrderId())
+                .orElseThrow(() -> new IllegalArgumentException("Not found order."));
+
+        if (order.getPaymentStatus() != PaymentOrder.PaymentStatus.SUCCESS) {
+            throw new IllegalArgumentException("Unpaid order.");
+        }
+        if (Boolean.TRUE.equals(order.getLicenseCreated())) {
+            throw new IllegalArgumentException("License have created with this order.");
+        }
+
+        SubscriptionPackage subscription = order.getSubscriptionPackage();
+        int durationDays = switch (subscription.getBillingCycle()) {
+            case MONTHLY -> 30;
+            case HALF_YEARLY -> 182;
+            case YEARLY -> 365;
+            default -> throw new IllegalStateException("BillingCycle is not valid.");
+        };
+
+        Long userId = order.getUser().getId();
+        boolean hasActiveLicense = licenseRepository.existsByUserIdAndCanUsedTrue(userId);
+
+        License license = new License();
+        license.setLicenseKey(generateLicenseKey());
+        license.setDuration(durationDays);
+        license.setIp(ip);
+        license.setUser(order.getUser());
+        license.setSubscriptionPackage(subscription);
+        license.setOrderId(form.getOrderId());
+        license.setCanUsed(!hasActiveLicense);
+
+        if (!hasActiveLicense) {
+            license.setActivatedAt(LocalDateTime.now());
+        } else {
+            license.setActivatedAt(null);
+        }
+
+        order.setLicenseCreated(true);
+        License saved = licenseRepository.save(license);
+        return toDtoWithSubscription(saved);
+    }
+
+    @Override
+    public PaymentOrder changeStatusOrderIdCreateLicense(Integer orderId, String newStatus, String ip) {
+        PaymentOrder order = repository.findByOrderId(orderId)
+                .orElseThrow(() -> new RuntimeException("Not found order with orderId: " + orderId));
+
+        try {
+            PaymentOrder.PaymentStatus status = PaymentOrder.PaymentStatus.valueOf(newStatus);
+            order.setPaymentStatus(status);
+            order.setUpdatedAt(LocalDateTime.now());
+
+            // create license
+            if (status == PaymentOrder.PaymentStatus.SUCCESS && !Boolean.TRUE.equals(order.getLicenseCreated())) {
+                LicenseCreateForm form = new LicenseCreateForm();
+                form.setOrderId(orderId);
+                createLicensePayOS(form, ip);
+
+            }
+
+            PaymentOrder savedOrder = repository.save(order);
+
+            paymentSocketService.notifyOrderStatus(orderId, newStatus);
+
+            return savedOrder;
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Status is invalid");
+        }
+    }
+
 
     @Override
     public PaymentOrder changeStatusOrderByAdmin(Integer orderId, String newStatus) {
@@ -327,6 +426,7 @@ public class PaymentOrderService implements IPaymentOrderService {
                 .userId(user != null ? user.getId() : null)
                 .buyer(buyerDto)
                 .subscriptionId(subscription != null ? subscription.getId() : null)
+                .dateTransfer(entity.getDateTransfer())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .subscription(subscriptionDto)
@@ -353,6 +453,42 @@ public class PaymentOrderService implements IPaymentOrderService {
                 .subscriptionPackage(subscriptionRepository.findById(dto.getSubscriptionId()).orElseThrow())
                 .build();
     }
+
+    private LicenseDTO toDtoWithSubscription(License l) {
+        boolean isExpired;
+        int daysLeft;
+
+        if (Boolean.FALSE.equals(l.getCanUsed())) {
+            isExpired = false;
+            daysLeft = l.getDuration();
+        } else {
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime expiryDate = l.getActivatedAt().plusDays(l.getDuration());
+            isExpired = now.isAfter(expiryDate);
+            daysLeft = isExpired ? 0 : (int) Duration.between(now, expiryDate).toDays();
+        }
+
+        return LicenseDTO.builder()
+                .id(l.getId())
+                .licenseKey(l.getLicenseKey())
+                .duration(l.getDuration())
+                .ip(l.getIp())
+                .hardwareId(l.getHardwareId())
+                .userId(l.getUser().getId())
+                .isExpired(isExpired)
+                .daysLeft(daysLeft)
+                .canUsed(l.getCanUsed())
+                .subscriptionId(l.getSubscriptionPackage().getId())
+                .orderId(l.getOrderId())
+                .createdAt(l.getCreatedAt())
+                .updatedAt(l.getUpdatedAt())
+                .activatedAt(l.getActivatedAt())
+                .subscription(modelMapper.map(l.getSubscriptionPackage(), SubscriptionPackageDTO.class))
+                .build();
+    }
+
+
+
     @Override
 public Double getTotalRevenue() {
     return repository.findAll().stream()

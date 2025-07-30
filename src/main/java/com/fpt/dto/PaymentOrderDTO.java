@@ -23,6 +23,7 @@ public class PaymentOrderDTO {
     private Long userId;
     private Long subscriptionId;
     private LicenseDTO license;
+    private String dateTransfer;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Boolean canReport;

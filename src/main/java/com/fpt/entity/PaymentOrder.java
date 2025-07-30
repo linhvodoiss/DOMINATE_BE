@@ -55,7 +55,8 @@ public class PaymentOrder {
     private Boolean licenseCreated = false;
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted = false;
-
+    @Column(name = "date_transfer")
+    private String dateTransfer;
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

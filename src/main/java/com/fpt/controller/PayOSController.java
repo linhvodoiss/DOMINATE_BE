@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -75,7 +76,7 @@ public class PayOSController {
      * PayOS send webhook to update order status
      */
     @PostMapping("/webhook")
-    public ResponseEntity<Map<String, Object>> handleWebhook(@RequestBody Map<String, Object> webhookPayload) {
+    public ResponseEntity<Map<String, Object>> handleWebhook(@RequestBody Map<String, Object> webhookPayload, HttpServletRequest request) {
         try {
             LOGGER.info("📥 Nhận webhook từ PayOS: " + webhookPayload);
 
@@ -89,12 +90,12 @@ public class PayOSController {
 
             Map<String, Object> data = (Map<String, Object>) dataObj;
 
-            // Log chi tiết dữ liệu nhận được
             LOGGER.info("🔍 Dữ liệu webhook: orderCode=" + data.get("orderCode") + ", amount=" + data.get("amount") + ", status=" + data.get("status"));
 
-            // Bỏ qua webhook test (ví dụ: orderCode=123 với transactionDateTime cũ)
-            if (data.containsKey("orderCode") && "123".equals(data.get("orderCode").toString()) &&
-                    data.containsKey("transactionDateTime") && ((String) data.get("transactionDateTime")).startsWith("2023")) {
+            // Bỏ qua webhook test
+            if ("123".equals(data.get("orderCode").toString()) &&
+                    data.containsKey("transactionDateTime") &&
+                    ((String) data.get("transactionDateTime")).startsWith("2023")) {
                 LOGGER.info("⏭️ Bỏ qua webhook test với orderCode=123 và transactionDateTime cũ");
                 return ResponseEntity.ok(Map.of("success", true, "message", "Test webhook ignored"));
             }
@@ -119,21 +120,17 @@ public class PayOSController {
                 return ResponseEntity.ok(Map.of("success", false, "message", "Invalid signature"));
             }
 
-            // Lấy và xử lý orderCode từ dữ liệu webhook
+            // Xử lý dữ liệu đơn hàng
             long orderCode = Long.parseLong(data.get("orderCode").toString());
             String statusOrder = (String) data.get("status");
-            long amount = Long.parseLong(data.get("amount").toString());
             String status = (String) data.get("code");
 
-            // Kiểm tra sự tồn tại của đơn hàng
             if (!paymentOrderService.orderIdExists((int) orderCode)) {
-                LOGGER.warning("❌ Không tìm thấy đơn hàng với orderCode: " + orderCode + ", Dữ liệu: " + data);
+                LOGGER.warning("❌ Không tìm thấy đơn hàng với orderCode: " + orderCode);
                 return ResponseEntity.ok(Map.of("success", false, "message", "Order not found"));
             }
-            LOGGER.warning("⚠️ Trạng thái status=" + statusOrder + ", code=" + status);
-            LOGGER.info("📦 Dữ liệu data (raw): " + data);
 
-            // Map trạng thái về hệ thống nội bộ
+            // Map trạng thái
             String internalStatus;
             if ("PAID".equals(statusOrder) || "00".equals(status)) {
                 internalStatus = "SUCCESS";
@@ -144,8 +141,19 @@ public class PayOSController {
                 LOGGER.warning("⚠️ Trạng thái không rõ ràng, mặc định PENDING: status=" + statusOrder + ", code=" + status);
             }
 
-            LOGGER.info("✅ Webhook hợp lệ - OrderCode: " + orderCode + ", Amount: " + amount + ", Status nội bộ: " + internalStatus);
-            paymentOrderService.changeStatusOrderByOrderId((int) orderCode, internalStatus);
+            // Lấy thêm 4 field từ webhook
+            String bin = (String) data.get("counterAccountBankId");
+            String accountName = (String) data.get("counterAccountName");
+            String accountNumber = (String) data.get("counterAccountNumber");
+            String qrCode = (String) data.get("paymentLinkId");
+            String dateTransfer=(String) data.get("transactionDateTime");
+            String ip = request.getHeader("X-Forwarded-For");
+            if (ip == null || ip.isBlank()) {
+                ip = request.getRemoteAddr();
+            }
+            // Cập nhật vào DB
+            LOGGER.info("✅ Cập nhật đơn hàng từ webhook - orderCode=" + orderCode + ", internalStatus=" + internalStatus);
+            paymentOrderService.updateOrderFromWebhook((int) orderCode, internalStatus, bin, accountName, accountNumber, qrCode,dateTransfer,ip);
 
             return ResponseEntity.ok(Map.of("success", true));
         } catch (Exception e) {
@@ -153,6 +161,7 @@ public class PayOSController {
             return ResponseEntity.status(500).body(Map.of("success", false, "message", "Internal server error"));
         }
     }
+
     private String calculateHmacSha256(String data, String key) throws Exception {
         Mac mac = Mac.getInstance("HmacSHA256");
         SecretKeySpec secretKeySpec = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
