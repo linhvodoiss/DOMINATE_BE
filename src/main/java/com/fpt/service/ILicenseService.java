@@ -28,6 +28,7 @@ public interface ILicenseService {
     LicenseVerifyResponse verifyLicense(LicenseVerifyRequestForm request);
     LicenseVerifyResponse verifyLicensePro(LicenseVerifyRequestForm request);
     LicenseDTO update(Long id, LicenseDTO dto);
+    void unbindHardwareIdFromLicense(String licenseKey);
     void delete(Long id);
     List<LicenseDTO> getByUserId(Long userId);
 }

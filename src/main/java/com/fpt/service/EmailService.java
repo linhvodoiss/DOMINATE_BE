@@ -1,6 +1,7 @@
 package com.fpt.service;
 
 
+import com.fpt.websocket.PaymentSocketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
@@ -31,7 +32,8 @@ public class EmailService implements IEmailService {
 
 	@Autowired
 	private JavaMailSender mailSender;
-
+	@Autowired
+	private PaymentSocketService paymentSocketService;
 	@Override
 	public void sendRegistrationUserConfirm(String email) {
 
@@ -105,6 +107,7 @@ public class EmailService implements IEmailService {
 
 
 		sendEmail(email, subject, contentMess);
+		paymentSocketService.notifyOrderReport(orderId, content);
 	}
 
 

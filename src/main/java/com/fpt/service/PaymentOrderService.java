@@ -9,6 +9,7 @@ import com.fpt.repository.PaymentOrderRepository;
 import com.fpt.repository.SubscriptionPackageRepository;
 import com.fpt.repository.UserRepository;
 import com.fpt.specification.PaymentOrderSpecificationBuilder;
+import com.fpt.utils.LicenseKeyGenerate;
 import com.fpt.websocket.PaymentSocketService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -155,10 +157,6 @@ public class PaymentOrderService implements IPaymentOrderService {
             throw new RuntimeException("Status is invalid");
         }
     }
-    private String generateLicenseKey() {
-        return "LIC-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-    }
-
     @Override
     public LicenseDTO createLicensePayOS(LicenseCreateForm form, String ip) {
         PaymentOrder order = repository.findByOrderIdForUpdate(form.getOrderId())
@@ -183,7 +181,7 @@ public class PaymentOrderService implements IPaymentOrderService {
         boolean hasActiveLicense = licenseRepository.existsByUserIdAndCanUsedTrue(userId);
 
         License license = new License();
-        license.setLicenseKey(generateLicenseKey());
+        license.setLicenseKey(LicenseKeyGenerate.generateLicenseKey());
         license.setDuration(durationDays);
         license.setIp(ip);
         license.setUser(order.getUser());

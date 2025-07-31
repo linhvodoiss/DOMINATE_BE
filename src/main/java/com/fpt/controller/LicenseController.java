@@ -8,10 +8,7 @@ import com.fpt.entity.PaymentOrder;
 import com.fpt.entity.SubscriptionPackage;
 import com.fpt.form.LicenseCreateForm;
 import com.fpt.form.LicenseVerifyRequestForm;
-import com.fpt.payload.ErrorNoResponse;
-import com.fpt.payload.LicenseVerifyResponse;
-import com.fpt.payload.PaginatedResponse;
-import com.fpt.payload.SuccessResponse;
+import com.fpt.payload.*;
 import com.fpt.repository.LicenseRepository;
 import com.fpt.service.ILicenseService;
 import lombok.RequiredArgsConstructor;
@@ -133,6 +130,18 @@ public ResponseEntity<PaginatedResponse<LicenseDTO>> getAllOrders(
         }
     }
 
+    @PatchMapping("/unbind-hardware")
+    public ResponseEntity<SuccessNoResponse> unbindHardware(@RequestParam String licenseKey) {
+
+        try {
+            service.unbindHardwareIdFromLicense(licenseKey);
+            return ResponseEntity.ok(new SuccessNoResponse(200, "Unbind hardware successfully!"));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(new SuccessNoResponse(500, "Unbind hardware failed!"));
+        }
+
+
+    }
 
 
 

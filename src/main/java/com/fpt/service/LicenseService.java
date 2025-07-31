@@ -15,6 +15,7 @@ import com.fpt.repository.PaymentOrderRepository;
 import com.fpt.repository.SubscriptionPackageRepository;
 import com.fpt.repository.UserRepository;
 import com.fpt.specification.LicenseSpecificationBuilder;
+import com.fpt.utils.LicenseKeyGenerate;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -128,7 +130,7 @@ public class LicenseService implements ILicenseService {
         boolean hasActiveLicense = licenseRepository.existsByUserIdAndCanUsedTrue(userId);
 
         License license = new License();
-        license.setLicenseKey(generateLicenseKey());
+        license.setLicenseKey(LicenseKeyGenerate.generateLicenseKey());
         license.setDuration(durationDays);
         license.setIp(ip);
         license.setUser(order.getUser());
@@ -262,10 +264,6 @@ public class LicenseService implements ILicenseService {
         return new LicenseVerifyResponse(true, 200, type.toString(), "License is valid.", expiredAt);
     }
 
-    private String generateLicenseKey() {
-        return "LIC-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-    }
-
     @Override
     public LicenseDTO update(Long id, LicenseDTO dto) {
         License license = licenseRepository.findById(id)
@@ -278,6 +276,14 @@ public class LicenseService implements ILicenseService {
         return toDtoWithSubscription(licenseRepository.save(license));
     }
 
+    @Override
+    public void unbindHardwareIdFromLicense(String licenseKey) {
+        License license = licenseRepository.findByLicenseKey(licenseKey)
+                .orElseThrow(() -> new IllegalArgumentException("License not found."));
+
+        license.setHardwareId(null);
+        licenseRepository.save(license);
+    }
     @Override
     public void delete(Long id) {
         licenseRepository.deleteById(id);

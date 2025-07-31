@@ -35,4 +35,14 @@ public class PaymentSocketService {
                 )
         );
     }
+    public void notifyOrderReport(Integer orderId, String content) {
+        messagingTemplate.convertAndSend(
+                "/topic/order/report",
+                Map.of(
+                        "orderId", orderId,
+                        "content", content
+                )
+        );
+    }
+
 }
