@@ -153,7 +153,9 @@ public class LicenseService implements ILicenseService {
     public LicenseDTO bindHardwareIdToLicense(LicenseCreateForm form) {
         License license = licenseRepository.findByLicenseKey(form.getLicenseKey())
                 .orElseThrow(() -> new IllegalArgumentException("License is not exist."));
-
+        if (!license.getSubscriptionPackage().getTypePackage().equals(form.getType())) {
+            throw new IllegalStateException("License type mismatch.");
+        }
         if (license.getHardwareId() != null && !license.getHardwareId().equals(form.getHardwareId())) {
             throw new IllegalStateException("License don't have match with other device.");
         }

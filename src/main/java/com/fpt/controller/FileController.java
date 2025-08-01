@@ -25,13 +25,14 @@ public class FileController {
 	@Autowired
 	private IFileService fileService;
 
-	@PostMapping(value = "/image")
-	public ResponseEntity<?> upLoadImage(@RequestParam(name = "image") MultipartFile image) throws IOException {
-
+	@PostMapping
+	public ResponseEntity<?> uploadImage(@RequestParam("image") MultipartFile image) throws IOException {
 		if (!new FileManager().isTypeFileImage(image)) {
-			return new ResponseEntity<>("File must be image!", HttpStatus.UNPROCESSABLE_ENTITY);
+			return ResponseEntity.unprocessableEntity().body("File must be image!");
 		}
-		
-		return new ResponseEntity<>(fileService.uploadImage(image), HttpStatus.OK);
+
+		String imageUrl = fileService.uploadImage(image);
+		return ResponseEntity.ok(imageUrl); // Trả lại đường dẫn URL để frontend dùng
 	}
+
 }
