@@ -26,6 +26,9 @@ public class SubscriptionPackage {
 
     @Column(nullable = false)
     private String name;
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    private String description;
 
     private Float price;
 

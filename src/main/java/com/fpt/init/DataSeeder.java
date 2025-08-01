@@ -64,6 +64,7 @@ public class DataSeeder implements CommandLineRunner {
             for (SubscriptionPackage.BillingCycle cycle : SubscriptionPackage.BillingCycle.values()) {
                 SubscriptionPackage runtimePackage = SubscriptionPackage.builder()
                         .name("Runtime Package")
+                        .description("hihi")
                         .price(getFixedPrice(cycle))
                         .discount(0f)
                         .billingCycle(cycle)
@@ -75,6 +76,7 @@ public class DataSeeder implements CommandLineRunner {
 
                 SubscriptionPackage devPackage = SubscriptionPackage.builder()
                         .name("Dev Package")
+                        .description("hihi")
                         .price(getFixedPrice(cycle))
                         .discount(10f)
                         .billingCycle(cycle)

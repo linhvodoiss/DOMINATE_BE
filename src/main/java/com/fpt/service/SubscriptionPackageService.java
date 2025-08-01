@@ -95,7 +95,7 @@ private ModelMapper modelMapper;
         entity.setBillingCycle(SubscriptionPackage.BillingCycle.valueOf(dto.getBillingCycle()));
         entity.setIsActive(dto.getIsActive());
         entity.setSimulatedCount(dto.getSimulatedCount());
-
+        entity.setDescription(dto.getDescription());
         if (dto.getOptionsId() != null && !dto.getOptionsId().isEmpty()) {
             List<Option> options = optionRepository.findAllById(dto.getOptionsId());
             if (options.size() != dto.getOptionsId().size()) {
@@ -137,6 +137,7 @@ private ModelMapper modelMapper;
         entity.setBillingCycle(SubscriptionPackage.BillingCycle.valueOf(dto.getBillingCycle()));
         entity.setTypePackage(SubscriptionPackage.TypePackage.valueOf(dto.getTypePackage()));
         entity.setSimulatedCount(0L);
+        entity.setDescription(dto.getDescription());
 
         if (dto.getOptionsId() != null && !dto.getOptionsId().isEmpty()) {
             List<Option> options = optionRepository.findAllById(dto.getOptionsId());
@@ -213,6 +214,7 @@ private ModelMapper modelMapper;
         return SubscriptionPackageDTO.builder()
                 .id(entity.getId())
                 .name(entity.getName())
+                .description(entity.getDescription())
                 .price(entity.getPrice())
                 .discount(entity.getDiscount())
                 .billingCycle(entity.getBillingCycle().name())

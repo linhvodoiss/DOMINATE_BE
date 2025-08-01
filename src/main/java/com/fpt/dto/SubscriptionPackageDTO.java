@@ -18,6 +18,7 @@ import java.util.Set;
 public class SubscriptionPackageDTO {
     private Long id;
     private String name;
+    private String description;
     private Float price;
     private Float discount;
     private String billingCycle;
