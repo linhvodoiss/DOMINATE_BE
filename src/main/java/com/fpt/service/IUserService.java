@@ -11,7 +11,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import com.fpt.dto.ChangePublicProfileDTO;
 import com.fpt.entity.User;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface IUserService extends UserDetailsService {
@@ -47,6 +49,7 @@ public interface IUserService extends UserDetailsService {
 	void changeUserProfile(String username, ChangePublicProfileDTO dto);
 	void changePasswordUser(Long userId, ChangePasswordForm newPassword);
 	void changePasswordAdmin(Long userId, ChangePasswordForm newPassword);
+	String updateUserAvatar(String username, MultipartFile file) throws IOException;
 	Boolean updateActiveStatus(Long userId);
 	UserDTO UpdateUserInformation(Long userId, ChangePublicProfileDTO dto);
 	List<UserListDTO> convertToDto(List<User> data);

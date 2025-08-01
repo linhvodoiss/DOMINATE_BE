@@ -22,13 +22,45 @@ public class FileService implements IFileService {
 
 	@Override
 	public String uploadImage(MultipartFile file) throws IOException {
+//		2 MB
+		final long MAX_SIZE = 2 * 1024 * 1024;
+		// type file is accepted
+		final String[] allowedExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+
+		if (file.isEmpty()) {
+			throw new IllegalArgumentException("File is empty");
+		}
+
+		if (file.getSize() > MAX_SIZE) {
+			throw new IllegalArgumentException("File size exceeds the maximum limit (2MB)");
+		}
+
+		String originalFilename = file.getOriginalFilename();
+		if (originalFilename == null || !originalFilename.contains(".")) {
+			throw new IllegalArgumentException("Invalid file name or format");
+		}
+
+		String extension = originalFilename.substring(originalFilename.lastIndexOf(".")).toLowerCase();
+
+		boolean isValidExtension = false;
+		for (String allowed : allowedExtensions) {
+			if (allowed.equals(extension)) {
+				isValidExtension = true;
+				break;
+			}
+		}
+
+		if (!isValidExtension) {
+			throw new IllegalArgumentException("Unsupported file type. Allowed: jpg, jpeg, png, gif, webp");
+		}
+
+		// Create if no exist
 		File dir = new File(UPLOAD_DIR);
 		if (!dir.exists()) {
 			dir.mkdirs();
 		}
 
-		String originalFilename = file.getOriginalFilename();
-		String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+		// file unique
 		String uniqueName = UUID.randomUUID().toString() + extension;
 
 		File destination = new File(dir, uniqueName);
@@ -37,4 +69,17 @@ public class FileService implements IFileService {
 		return "/uploads/" + uniqueName;
 	}
 
+	@Override
+	public void deleteImage(String fileName) {
+		if (fileName == null || fileName.isEmpty()) return;
+
+		if (fileName.startsWith("/uploads/")) {
+			fileName = fileName.replace("/uploads/", "");
+		}
+
+		File file = new File(UPLOAD_DIR, fileName);
+		if (file.exists()) {
+			file.delete();
+		}
+	}
 }

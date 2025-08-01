@@ -9,6 +9,8 @@ import org.springframework.data.repository.query.Param;
 import com.fpt.entity.User;
 import com.fpt.entity.UserStatus;
 
+import java.util.Optional;
+
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
 
 	public boolean existsByUserName(String userName);
@@ -21,7 +23,11 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
 	public UserStatus findStatusByEmail(@Param("email") String email);
 
 	public User findByUserName(String name);
-	
+
+	@Query("SELECT u FROM User u WHERE u.userName = :username")
+	Optional<User> findByUserName2(@Param("username") String username);
+
+
 	public User findByEmail(String email);
 
 	public Long countByRole(Role role);

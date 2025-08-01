@@ -1,5 +1,6 @@
 package com.fpt.service;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +34,7 @@ import com.fpt.event.OnSendRegistrationUserConfirmViaEmailEvent;
 import com.fpt.repository.RegistrationUserTokenRepository;
 import com.fpt.repository.ResetPasswordTokenRepository;
 import com.fpt.repository.UserRepository;
+import org.springframework.web.multipart.MultipartFile;
 
 @Component
 @Transactional
@@ -40,6 +42,8 @@ public class UserService implements IUserService {
 
 	@Autowired
 	private UserRepository userRepository;
+	@Autowired
+	private FileService fileService;
 
 	@Autowired
 	private RegistrationUserTokenRepository registrationUserTokenRepository;
@@ -359,6 +363,22 @@ public class UserService implements IUserService {
 		user.setPassword(passwordEncoder.encode(form.getNewPassword()));
 		userRepository.save(user);
 	}
+	@Override
+	public String updateUserAvatar(String username, MultipartFile file) throws IOException {
+		User user = userRepository.findByUserName2(username)
+				.orElseThrow(() -> new RuntimeException("User not found"));
+
+		if (user.getAvatarUrl() != null) {
+			fileService.deleteImage(user.getAvatarUrl());
+		}
+
+		String newAvatarUrl = fileService.uploadImage(file);
+		user.setAvatarUrl(newAvatarUrl);
+		userRepository.save(user);
+
+		return newAvatarUrl;
+	}
+
 	@Override
 	public Long countCustomerAccounts() {
 		return userRepository.countByRole(Role.CUSTOMER);
