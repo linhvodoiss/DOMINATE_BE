@@ -68,6 +68,18 @@ public class SubscriptionPackageController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/top")
+    public ResponseEntity<SuccessResponse<List<SubscriptionPackageDTO>>> getTop3MostUsed() {
+        List<SubscriptionPackageDTO> topPackages = service.getTop3MostUsedPackages();
+        SuccessResponse<List<SubscriptionPackageDTO>> response = new SuccessResponse<>(
+                HttpServletResponse.SC_OK,
+                "Get data successfully",
+                topPackages
+        );
+        return ResponseEntity.ok(response);
+    }
+
+
     @GetMapping("/{id}")
     public ResponseEntity<SuccessResponse<SubscriptionPackageDTO>> getById(@PathVariable Long id) {
         SubscriptionPackageDTO dto = service.getById(id);

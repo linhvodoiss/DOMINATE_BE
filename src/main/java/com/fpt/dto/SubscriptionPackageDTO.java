@@ -26,6 +26,9 @@ public class SubscriptionPackageDTO {
     private List<OptionDTO> options;
     private List<Long> optionsId;
     private Long simulatedCount;
+    private Long realCount;
+    private Long totalCount;
+    private Boolean popular;
     @JsonFormat(pattern = "dd-MM-yyyy HH:mm:ss")
     private LocalDateTime createdAt;
     @JsonFormat(pattern = "dd-MM-yyyy HH:mm:ss")

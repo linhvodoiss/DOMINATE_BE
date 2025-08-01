@@ -4,9 +4,11 @@ import com.fpt.dto.OptionDTO;
 import com.fpt.dto.SubscriptionPackageDTO;
 import com.fpt.dto.UserListDTO;
 import com.fpt.entity.Option;
+import com.fpt.entity.PaymentOrder;
 import com.fpt.entity.SubscriptionPackage;
 import com.fpt.entity.User;
 import com.fpt.repository.OptionRepository;
+import com.fpt.repository.PaymentOrderRepository;
 import com.fpt.repository.SubscriptionPackageRepository;
 import com.fpt.specification.SubscriptionPackageSpecificationBuilder;
 import com.fpt.specification.UserSpecificationBuilder;
@@ -32,7 +34,10 @@ public class SubscriptionPackageService implements ISubscriptionPackageService {
 
     private final SubscriptionPackageRepository repository;
     private final OptionRepository optionRepository;
-@Autowired
+
+    private final PaymentOrderRepository paymentOrderRepository;
+
+    @Autowired
 private ModelMapper modelMapper;
     @Override
     public Page<SubscriptionPackageDTO> getAllPackage(Pageable pageable, String search, Boolean isActive, Double minPrice,Double maxPrice,SubscriptionPackage.TypePackage type,SubscriptionPackage.BillingCycle cycle) {
@@ -145,7 +150,48 @@ private ModelMapper modelMapper;
         SubscriptionPackage saved = repository.save(entity);
         return toDto(saved);
     }
+    @Override
+    public List<SubscriptionPackageDTO> getTop3MostUsedPackages() {
+        List<SubscriptionPackage> packages = repository.findAll();
 
+        List<SubscriptionPackageDTO> topList = packages.stream()
+                .map(packageEntity -> {
+                    Long realCount = paymentOrderRepository
+                            .countBySubscriptionPackageIdAndPaymentStatus(packageEntity.getId(), PaymentOrder.PaymentStatus.SUCCESS);
+                    if (realCount == null) {
+                        realCount = 0L;
+                    }
+                    Long simulatedCount = packageEntity.getSimulatedCount() != null ? packageEntity.getSimulatedCount() : 0L;
+                    Long totalCount = realCount + simulatedCount;
+
+                    SubscriptionPackageDTO dto = toDto(packageEntity);
+                    dto.setRealCount(realCount);
+                    dto.setSimulatedCount(simulatedCount);
+                    dto.setTotalCount(totalCount);
+                    return dto;
+                })
+                .sorted((a, b) -> Long.compare(b.getTotalCount(), a.getTotalCount())) // giảm dần
+                .limit(3)
+                .collect(Collectors.toList());
+
+        if (topList.size() == 3) {
+            SubscriptionPackageDTO mostPopular = topList.remove(0);
+            mostPopular.setPopular(true);
+
+            topList.add(1, mostPopular);
+
+
+            topList.get(0).setPopular(false);
+            topList.get(2).setPopular(false);
+        } else {
+
+            for (int i = 0; i < topList.size(); i++) {
+                topList.get(i).setPopular(i == 0);
+            }
+        }
+
+        return topList;
+    }
 
 
     private SubscriptionPackageDTO toDto(SubscriptionPackage entity) {
@@ -159,7 +205,11 @@ private ModelMapper modelMapper;
                         .updatedAt(option.getUpdatedAt())
                         .build())
                 .collect(Collectors.toList());
-
+        Long realCount = paymentOrderRepository
+                .countBySubscriptionPackageIdAndPaymentStatus(entity.getId(), PaymentOrder.PaymentStatus.SUCCESS);
+        if (realCount == null) {
+            realCount = 0L;
+        }
         return SubscriptionPackageDTO.builder()
                 .id(entity.getId())
                 .name(entity.getName())
@@ -170,6 +220,7 @@ private ModelMapper modelMapper;
                 .isActive(entity.getIsActive())
                 .options(optionDTOs)
                 .simulatedCount(entity.getSimulatedCount())
+                .realCount(realCount)
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .build();

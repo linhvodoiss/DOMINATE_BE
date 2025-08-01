@@ -50,7 +50,7 @@ public class SubscriptionPackage {
     )
     private List<Option> options;
 
-    private Long simulatedCount;
+    private Long simulatedCount=0L;
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

@@ -14,6 +14,7 @@ public interface ISubscriptionPackageService {
     List<SubscriptionPackageDTO> getAll();
     SubscriptionPackageDTO getById(Long id);
     SubscriptionPackageDTO create(SubscriptionPackageDTO dto);
+    List<SubscriptionPackageDTO> getTop3MostUsedPackages();
     SubscriptionPackageDTO update(Long id, SubscriptionPackageDTO dto);
     void delete(Long id);
     void deleteMore(List<Long> ids);

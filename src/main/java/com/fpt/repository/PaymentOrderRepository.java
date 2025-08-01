@@ -23,6 +23,8 @@ public interface PaymentOrderRepository extends JpaRepository<PaymentOrder, Long
     Long countByPaymentStatus(PaymentOrder.PaymentStatus status);
     Long countByPaymentMethod(PaymentOrder.PaymentMethod method);
 
+    Long countBySubscriptionPackageIdAndPaymentStatus(Long subscriptionId, PaymentOrder.PaymentStatus status);
+
     List<PaymentOrder> findAllByPaymentMethodAndPaymentStatus(
             PaymentOrder.PaymentMethod method,
             PaymentOrder.PaymentStatus status
