@@ -112,7 +112,6 @@ public class UserService implements IUserService {
 		user.setFirstName(dto.getFirstName());
 		user.setLastName(dto.getLastName());
 		user.setEmail(dto.getEmail());
-		user.setUserName(dto.getUserName());
 		user.setPhoneNumber(dto.getPhoneNumber());
 		user.setAvatarUrl(dto.getAvatarUrl());
 		user.setRole(dto.getRole());
