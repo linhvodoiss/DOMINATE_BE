@@ -121,6 +121,23 @@ public class PaymentOrderService implements IPaymentOrderService {
         changeStatusOrderIdCreateLicense(orderCode, internalStatus,ip);
     }
 
+    @Override
+    public void syncBill(int orderCode, String bin, String accountName, String accountNumber, String qrCode,String dateTransfer) {
+        PaymentOrder order = repository.findByOrderId(orderCode)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với orderCode: " + orderCode));
+
+        // Update information from webhook
+        if (bin != null) order.setBin(bin);
+        if (accountName != null) order.setAccountName(accountName);
+        if (accountNumber != null) order.setAccountNumber(accountNumber);
+        if (qrCode != null) order.setQrCode(qrCode);
+        if (dateTransfer != null) order.setDateTransfer(dateTransfer);
+        order.setUpdatedAt(LocalDateTime.now());
+
+        // Save information
+        repository.save(order);
+    }
+
 
 
 

@@ -218,4 +218,42 @@ public class PayOSController {
         }
     }
 
+
+    @PostMapping("/sync/{paymentLinkId}")
+    public ResponseEntity<?> syncPayment(@PathVariable Integer paymentLinkId) {
+        try {
+            Map<String, Object> info = payOSService.getPaymentLinkInfo(paymentLinkId);
+            Map<String, Object> dataPayment = (Map<String, Object>) info.get("data");
+
+            String status = (String) dataPayment.get("status");
+            if (!"PAID".equalsIgnoreCase(status)) {
+                return ResponseEntity.status(400).body(new SuccessNoResponse(400, "Order haven't payment."));
+            }
+
+            Integer orderCode = (Integer) dataPayment.get("orderCode");
+            List<Map<String, Object>> transactions = (List<Map<String, Object>>) dataPayment.get("transactions");
+            if (transactions == null || transactions.isEmpty()) {
+                return ResponseEntity.status(400).body(new SuccessNoResponse(400, "You have no transaction."));
+            }
+
+            Map<String, Object> transaction = transactions.get(0);
+            String bin = (String) transaction.get("counterAccountBankId");
+            String accountName = (String) transaction.get("counterAccountName");
+            String accountNumber = (String) transaction.get("counterAccountNumber");
+            String qrCode = (String) transaction.get("description");
+            String dateTransfer = (String) transaction.get("transactionDateTime");
+
+            paymentOrderService.syncBill(orderCode, bin, accountName, accountNumber, qrCode, dateTransfer);
+
+            return ResponseEntity.ok(Map.of(
+                    "code", 200,
+                    "message", "Sync bill successfully",
+                    "orderCode", orderCode
+            ));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(new SuccessNoResponse(500, "Sync bill error: " + e.getMessage()));
+        }
+    }
+
 }

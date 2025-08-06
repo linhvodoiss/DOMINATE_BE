@@ -20,6 +20,7 @@ public interface IPaymentOrderService {
     PaymentOrderDTO createOrder(OrderFormCreating form, Long userId);
     void updateOrderFromWebhook(int orderCode, String internalStatus,
                                 String bin, String accountName, String accountNumber, String qrCode,String dateTransfer,String id);
+    void syncBill(int orderCode, String bin, String accountName, String accountNumber, String qrCode,String dateTransfer);
     PaymentOrder changeStatusOrder(Long orderId, String newStatus);
     PaymentOrder changeStatusOrderByAdmin(Integer orderId, String newStatus);
     PaymentOrder changeStatusOrderByOrderId(Integer orderId, String newStatus);
