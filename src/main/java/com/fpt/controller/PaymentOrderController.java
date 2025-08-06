@@ -195,9 +195,9 @@ public class PaymentOrderController {
         ));
     }
 
-
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<PaginatedResponse<PaymentOrderDTO>> getByUserId( @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable,@PathVariable Long userId,            @RequestParam(required = false) String search,
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/user")
+    public ResponseEntity<PaginatedResponse<PaymentOrderDTO>> getByUserId( @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable,@CurrentUserId Long userId,  @RequestParam(required = false) String search,
                                                              @RequestParam(required = false) Long subscriptionId,
                                                              @RequestParam(required = false) PaymentOrder.PaymentStatus status,
                                                                            @RequestParam(required = false) SubscriptionPackage.TypePackage type

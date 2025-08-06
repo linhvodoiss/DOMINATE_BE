@@ -1,5 +1,6 @@
 package com.fpt.controller;
 
+import com.fpt.annotation.CurrentUserId;
 import com.fpt.dto.LicenseDTO;
 import com.fpt.dto.PaymentOrderDTO;
 import com.fpt.dto.UserLicenseViewDTO;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -51,16 +53,16 @@ public ResponseEntity<PaginatedResponse<LicenseDTO>> getAllOrders(
     PaginatedResponse<LicenseDTO> response = new PaginatedResponse<>(dtoPage, HttpServletResponse.SC_OK, "Lấy danh sách các license thành công");
     return ResponseEntity.ok(response);
 }
-
-    @GetMapping("user/{userId}")
-    public ResponseEntity<PaginatedResponse<LicenseDTO>> getByUserId(@PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable, @PathVariable Long userId, @RequestParam(required = false) String search, @RequestParam(required = false) SubscriptionPackage.TypePackage type) {
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("user")
+    public ResponseEntity<PaginatedResponse<LicenseDTO>> getByUserId(@PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable, @CurrentUserId Long userId, @RequestParam(required = false) String search, @RequestParam(required = false) SubscriptionPackage.TypePackage type) {
         Page<LicenseDTO> dtoPage = service.getUserLicense(pageable, search,userId,type);
         PaginatedResponse<LicenseDTO> response = new PaginatedResponse<>(dtoPage, HttpServletResponse.SC_OK, "Lấy danh sách các license thành công");
         return ResponseEntity.ok(response);
     }
-
-    @GetMapping("canUsed/{userId}")
-    public ResponseEntity<SuccessResponse<List<LicenseDTO>>> getCanUsedLicenses(@PathVariable Long userId) {
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("canUsed")
+    public ResponseEntity<SuccessResponse<List<LicenseDTO>>> getCanUsedLicenses(@CurrentUserId Long userId) {
         List<LicenseDTO> licenseDTOs = service.getLicenseIsActiveOfUser(userId);
         return ResponseEntity.ok(new SuccessResponse<>(200, "Lấy danh sách license đang sử dụng thành công", licenseDTOs));
     }
@@ -114,10 +116,10 @@ public ResponseEntity<PaginatedResponse<LicenseDTO>> getAllOrders(
             ));
         }
     }
-
-    @PostMapping("/activate-next/{userId}")
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/activate-next")
     public ResponseEntity<?> activateNextLicense(
-            @PathVariable Long userId,
+            @CurrentUserId Long userId,
             @RequestParam SubscriptionPackage.TypePackage type
     ) {
         try {
