@@ -19,8 +19,9 @@ public interface IPaymentOrderService {
     List<PaymentOrderDTO> convertToDto(List<PaymentOrder> paymentOrders);
     PaymentOrderDTO createOrder(OrderFormCreating form, Long userId);
     void updateOrderFromWebhook(int orderCode, String internalStatus,
-                                String bin, String accountName, String accountNumber, String qrCode,String dateTransfer,String id);
-    void syncBill(int orderCode, String bin, String accountName, String accountNumber, String qrCode,String dateTransfer);
+                                String bin, String accountName, String accountNumber,String dateTransfer,String id);
+    void syncBill(int orderCode, String bin, String accountName, String accountNumber,String dateTransfer);
+    void addReasonCancel(int orderCode, String cancelReason,String dateTransfer);
     PaymentOrder changeStatusOrder(Long orderId, String newStatus);
     PaymentOrder changeStatusOrderByAdmin(Integer orderId, String newStatus);
     PaymentOrder changeStatusOrderByOrderId(Integer orderId, String newStatus);

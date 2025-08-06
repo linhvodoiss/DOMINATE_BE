@@ -16,7 +16,7 @@ public class PaymentOrderDTO {
     private String bin;
     private String accountName;
     private String accountNumber;
-    private String qrCode;
+    private String cancelReason;
     private String paymentStatus;
     private String paymentMethod;
     private Boolean licenseCreated;

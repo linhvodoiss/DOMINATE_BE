@@ -145,7 +145,6 @@ public class PayOSController {
             String bin = (String) data.get("counterAccountBankId");
             String accountName = (String) data.get("counterAccountName");
             String accountNumber = (String) data.get("counterAccountNumber");
-            String qrCode = (String) data.get("paymentLinkId");
             String dateTransfer=(String) data.get("transactionDateTime");
             String ip = request.getHeader("X-Forwarded-For");
             if (ip == null || ip.isBlank()) {
@@ -153,7 +152,7 @@ public class PayOSController {
             }
             // Cập nhật vào DB
             LOGGER.info("✅ Cập nhật đơn hàng từ webhook - orderCode=" + orderCode + ", internalStatus=" + internalStatus);
-            paymentOrderService.updateOrderFromWebhook((int) orderCode, internalStatus, bin, accountName, accountNumber, qrCode,dateTransfer,ip);
+            paymentOrderService.updateOrderFromWebhook((int) orderCode, internalStatus, bin, accountName, accountNumber,dateTransfer,ip);
 
             return ResponseEntity.ok(Map.of("success", true));
         } catch (Exception e) {
@@ -177,18 +176,25 @@ public class PayOSController {
     }
 
     @PostMapping("/cancel/{paymentLinkId}")
-    public ResponseEntity<SuccessNoResponse> cancelPaymentRequest(
+    public ResponseEntity<SuccessResponse<Map<String, Object>>> cancelPaymentRequest(
             @PathVariable("paymentLinkId") Integer paymentLinkId,
             @RequestParam(defaultValue = "Cancel payment") String reason) {
         try {
-            payOSService.cancelPaymentRequest(paymentLinkId, reason);
+            Map<String, Object> cancelData = payOSService.cancelPaymentRequest(paymentLinkId, reason);
             paymentOrderService.changeStatusOrderByOrderId(paymentLinkId, "FAILED");
-            return ResponseEntity.ok(new SuccessNoResponse(200, "Huỷ đơn hàng thành công"));
+            String cancellationReason = (String) cancelData.get("cancellationReason");
+            String canceledAt = (String) cancelData.get("canceledAt");
+            paymentOrderService.addReasonCancel(paymentLinkId,cancellationReason,canceledAt);
+            return ResponseEntity.ok(
+                    new SuccessResponse<>(200, "Huỷ đơn hàng thành công", cancelData)
+            );
         } catch (Exception e) {
             LOGGER.severe("❌ Lỗi huỷ đơn hàng: " + e.getMessage());
-            return ResponseEntity.status(500).body(new SuccessNoResponse(500, e.getMessage()));
+            return ResponseEntity.status(500)
+                    .body(new SuccessResponse<>(500, e.getMessage(), null));
         }
     }
+
     @GetMapping("/{paymentLinkId}")
     public ResponseEntity<?> getPaymentInfo(@PathVariable Integer paymentLinkId) {
         try {
@@ -240,10 +246,10 @@ public class PayOSController {
             String bin = (String) transaction.get("counterAccountBankId");
             String accountName = (String) transaction.get("counterAccountName");
             String accountNumber = (String) transaction.get("counterAccountNumber");
-            String qrCode = (String) transaction.get("description");
+
             String dateTransfer = (String) transaction.get("transactionDateTime");
 
-            paymentOrderService.syncBill(orderCode, bin, accountName, accountNumber, qrCode, dateTransfer);
+            paymentOrderService.syncBill(orderCode, bin, accountName, accountNumber, dateTransfer);
 
             return ResponseEntity.ok(Map.of(
                     "code", 200,

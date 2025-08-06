@@ -102,7 +102,7 @@ public class PaymentOrderService implements IPaymentOrderService {
 
     @Override
     public void updateOrderFromWebhook(int orderCode, String internalStatus,
-                                       String bin, String accountName, String accountNumber, String qrCode,String dateTransfer, String ip) {
+                                       String bin, String accountName, String accountNumber,String dateTransfer, String ip) {
         PaymentOrder order = repository.findByOrderId(orderCode)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với orderCode: " + orderCode));
 
@@ -110,7 +110,6 @@ public class PaymentOrderService implements IPaymentOrderService {
         if (bin != null) order.setBin(bin);
         if (accountName != null) order.setAccountName(accountName);
         if (accountNumber != null) order.setAccountNumber(accountNumber);
-        if (qrCode != null) order.setQrCode(qrCode);
         if (dateTransfer != null) order.setDateTransfer(dateTransfer);
         order.setUpdatedAt(LocalDateTime.now());
 
@@ -122,7 +121,7 @@ public class PaymentOrderService implements IPaymentOrderService {
     }
 
     @Override
-    public void syncBill(int orderCode, String bin, String accountName, String accountNumber, String qrCode,String dateTransfer) {
+    public void syncBill(int orderCode, String bin, String accountName, String accountNumber,String dateTransfer) {
         PaymentOrder order = repository.findByOrderId(orderCode)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với orderCode: " + orderCode));
 
@@ -130,13 +129,27 @@ public class PaymentOrderService implements IPaymentOrderService {
         if (bin != null) order.setBin(bin);
         if (accountName != null) order.setAccountName(accountName);
         if (accountNumber != null) order.setAccountNumber(accountNumber);
-        if (qrCode != null) order.setQrCode(qrCode);
         if (dateTransfer != null) order.setDateTransfer(dateTransfer);
         order.setUpdatedAt(LocalDateTime.now());
 
         // Save information
         repository.save(order);
         paymentSocketService.notifySyncBill(orderCode, accountName);
+    }
+
+    @Override
+    public void addReasonCancel(int orderCode, String cancelReason,String dateTransfer) {
+        PaymentOrder order = repository.findByOrderId(orderCode)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với orderCode: " + orderCode));
+
+        // Update information from webhook
+
+        if (dateTransfer != null) order.setDateTransfer(dateTransfer);
+        if (cancelReason != null) order.setCancelReason(cancelReason);
+        order.setUpdatedAt(LocalDateTime.now());
+        // Save information
+        repository.save(order);
+        paymentSocketService.notifySyncBill(orderCode, dateTransfer);
     }
 
 
@@ -433,7 +446,7 @@ public class PaymentOrderService implements IPaymentOrderService {
                 .bin(entity.getBin())
                 .accountName(entity.getAccountName())
                 .accountNumber(entity.getAccountNumber())
-                .qrCode(entity.getQrCode())
+                .cancelReason(entity.getCancelReason())
                 .paymentStatus(entity.getPaymentStatus().name())
                 .paymentMethod(entity.getPaymentMethod().name())
                 .licenseCreated(entity.getLicenseCreated())
@@ -464,7 +477,7 @@ public class PaymentOrderService implements IPaymentOrderService {
                 .bin(dto.getBin())
                 .accountName(dto.getAccountName())
                 .accountNumber(dto.getAccountNumber())
-                .qrCode(dto.getQrCode())
+                .cancelReason(dto.getCancelReason())
                 .user(userRepository.findById(dto.getUserId()).orElseThrow())
                 .subscriptionPackage(subscriptionRepository.findById(dto.getSubscriptionId()).orElseThrow())
                 .build();

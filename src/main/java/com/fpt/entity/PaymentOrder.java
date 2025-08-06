@@ -43,8 +43,8 @@ public class PaymentOrder {
     @Column(name = "payos_account_number")
     private String accountNumber;
 
-    @Column(name = "payos_qr_code", columnDefinition = "TEXT")
-    private String qrCode;
+    @Column(columnDefinition = "TEXT")
+    private String cancelReason;
 
     @Enumerated(EnumType.STRING)
     private PaymentStatus paymentStatus = PaymentStatus.PENDING;

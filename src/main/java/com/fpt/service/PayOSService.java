@@ -156,7 +156,8 @@ public class PayOSService {
         LOGGER.info("✅ Phản hồi xác nhận webhook thành công: " + responseBody.get("desc"));
     }
 
-    public void cancelPaymentRequest(Integer paymentLinkId, String reason) throws Exception {
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> cancelPaymentRequest(Integer paymentLinkId, String reason) throws Exception {
         String url = paymentUrl + "/" + paymentLinkId + "/cancel";
 
         Map<String, String> body = Map.of("cancellationReason", reason);
@@ -171,14 +172,19 @@ public class PayOSService {
         ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.POST, request, Map.class);
 
         Map<String, Object> responseBody = response.getBody();
+        LOGGER.info("✅ Lấy response hủy: " + responseBody);
 
         if (responseBody == null || !"00".equals(responseBody.get("code"))) {
             throw new RuntimeException("Huỷ đơn thất bại: " +
                     (responseBody != null ? responseBody.get("desc") : "Không có phản hồi"));
         }
 
+        Map<String, Object> data = (Map<String, Object>) responseBody.get("data");
+
         LOGGER.info("✅ Đã huỷ đơn hàng PayOS thành công: " + paymentLinkId);
+        return data; // Trả về data
     }
+
 
     public Map<String, Object> getPaymentLinkInfo(Integer paymentLinkId) {
         String url = paymentUrl + "/" + paymentLinkId;
