@@ -136,6 +136,7 @@ public class PaymentOrderService implements IPaymentOrderService {
 
         // Save information
         repository.save(order);
+        paymentSocketService.notifySyncBill(orderCode, accountName);
     }
 
 

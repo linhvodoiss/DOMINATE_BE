@@ -45,4 +45,10 @@ public class PaymentSocketService {
         );
     }
 
+    public void notifySyncBill(Integer orderId, String content) {
+        messagingTemplate.convertAndSend(
+                "/topic/sync/"+ orderId, content
+        );
+    }
+
 }
