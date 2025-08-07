@@ -51,7 +51,7 @@ public class JWTTokenService {
         // Tạo JSON object với code và user info
         Map<String, Object> responseBody = new HashMap<>();
         responseBody.put("code", HttpServletResponse.SC_OK);
-        responseBody.put("message", "Đăng nhập thành công!");
+        responseBody.put("message", "Login successfully!");
         responseBody.put("user", userDto);
 
         // Convert object to JSON string

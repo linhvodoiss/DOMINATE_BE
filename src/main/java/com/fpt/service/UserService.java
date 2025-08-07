@@ -200,7 +200,7 @@ public class UserService implements IUserService {
 		User user = userRepository.findByUserName(username);
 
 		if (user == null) {
-			throw new UsernameNotFoundException("Không tìm thấy người dùng");
+			throw new UsernameNotFoundException("Not found user");
 		}
 
 		if (user.getStatus() == UserStatus.NOT_ACTIVE) {
@@ -320,9 +320,9 @@ public class UserService implements IUserService {
 	@Override
 	public void changePasswordUser(Long userId, ChangePasswordForm form) {
 		User user = userRepository.findById(userId)
-				.orElseThrow(() -> new IllegalArgumentException("User không tồn tại"));
+				.orElseThrow(() -> new IllegalArgumentException("User is not exist"));
 		if (!passwordEncoder.matches(form.getOldPassword(), user.getPassword())) {
-			throw new IllegalArgumentException("Mật khẩu cũ không đúng");
+			throw new IllegalArgumentException("Old password is not match");
 		}
 		user.setPassword(passwordEncoder.encode(form.getNewPassword()));
 		userRepository.save(user);
@@ -331,7 +331,7 @@ public class UserService implements IUserService {
 	@Override
 	public Boolean updateActiveStatus(Long userId) {
 		User user = userRepository.findById(userId)
-				.orElseThrow(() -> new IllegalArgumentException("User không tồn tại"));
+				.orElseThrow(() -> new IllegalArgumentException("User is not exist"));
 
 		boolean newStatus = !Boolean.TRUE.equals(user.getIsActive());
 		user.setIsActive(newStatus);
@@ -342,7 +342,7 @@ public class UserService implements IUserService {
 	@Override
 	public UserDTO UpdateUserInformation(Long userId, ChangePublicProfileDTO dto) {
 		User user = userRepository.findById(userId)
-				.orElseThrow(() -> new IllegalArgumentException("User không tồn tại"));
+				.orElseThrow(() -> new IllegalArgumentException("User is not exist"));
 
 		user.setAvatarUrl(dto.getAvatarUrl());
 		user.setFirstName(dto.getFirstName());
@@ -358,7 +358,7 @@ public class UserService implements IUserService {
 	@Override
 	public void changePasswordAdmin(Long userId, ChangePasswordForm form) {
 		User user = userRepository.findById(userId)
-				.orElseThrow(() -> new IllegalArgumentException("User không tồn tại"));
+				.orElseThrow(() -> new IllegalArgumentException("User is not exist"));
 		user.setPassword(passwordEncoder.encode(form.getNewPassword()));
 		userRepository.save(user);
 	}

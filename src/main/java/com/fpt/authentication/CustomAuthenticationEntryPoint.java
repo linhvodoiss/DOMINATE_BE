@@ -26,7 +26,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         Map<String, Object> data = new HashMap<>();
         data.put("code", 401);
         data.put("error", "Unauthorized");
-        data.put("message", "Bạn không có quyền hạn");
+        data.put("message", "Unauthorized");
         data.put("path", request.getRequestURI());
 
         new ObjectMapper().writeValue(response.getOutputStream(), data);

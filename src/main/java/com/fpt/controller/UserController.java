@@ -72,13 +72,13 @@ public class UserController {
 
 			Map<String, Object> response = new HashMap<>();
 			response.put("code", HttpServletResponse.SC_OK);
-			response.put("message", "Đăng ký tài khoản thành công, vui lòng check email để kích hoạt tài khoản!");
+			response.put("message", "Register successfully, please check email to active account!");
 
 			return ResponseEntity.ok(response);
 		} catch (Exception e) {
 			Map<String, Object> errorResponse = new HashMap<>();
 			errorResponse.put("code", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			errorResponse.put("message", "Đăng ký tài khoản thất bại");
+			errorResponse.put("message", "Register account failed.");
 
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
 		}
@@ -112,7 +112,7 @@ public class UserController {
 		userService.resetPasswordViaEmail(email);
 		Map<String, Object> response = new HashMap<>();
 		response.put("code", HttpServletResponse.SC_OK);
-		response.put("message", "Chúng tôi đã gửi email, Vui lòng kiểm tra email "+email+" để đổi mật khẩu");
+		response.put("message", "We have sent email, Please check "+email+" to change password");
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
@@ -135,11 +135,11 @@ public class UserController {
 			userService.resetPassword(token, newPassword);
 
 			response.put("code", HttpServletResponse.SC_OK);
-			response.put("message", "Cập nhật mật khẩu thành công");
+			response.put("message", "Update password successfully.");
 			return new ResponseEntity<>(response, HttpStatus.OK);
 		} catch (Exception e) {
 			response.put("code", HttpServletResponse.SC_NOT_FOUND);
-			response.put("message", "Cập nhật mật khẩu thất bại");
+			response.put("message", "Update password failed.");
 			return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 		}
 	}
@@ -190,12 +190,12 @@ public class UserController {
 			userService.changePasswordUser(userId, request);
 			Map<String, Object> response = new HashMap<>();
 			response.put("code", HttpStatus.OK.value());
-			response.put("message", "Đổi mật khẩu thành công");
+			response.put("message", "Change password successfully.");
 			return ResponseEntity.ok(response);
 		} catch (Exception e) {
 			Map<String, Object> response = new HashMap<>();
 			response.put("code", HttpStatus.BAD_REQUEST.value());
-			response.put("message", "Đổi mật khẩu thất bại: " + e.getMessage());
+			response.put("message", "Change password failed: " + e.getMessage());
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
 		}
 

@@ -65,7 +65,7 @@ public class PayOSController {
 
         SuccessResponse<PayOSDTO> response = new SuccessResponse<>(
                 200,
-                "Tạo link thanh toán thành công",
+                "Create link payment successfully.",
                 payOSDTO
         );
 
@@ -186,7 +186,7 @@ public class PayOSController {
             String canceledAt = (String) cancelData.get("canceledAt");
             paymentOrderService.addReasonCancel(paymentLinkId,cancellationReason,canceledAt);
             return ResponseEntity.ok(
-                    new SuccessResponse<>(200, "Huỷ đơn hàng thành công", cancelData)
+                    new SuccessResponse<>(200, "Cancel order successfully", cancelData)
             );
         } catch (Exception e) {
             LOGGER.severe("❌ Lỗi huỷ đơn hàng: " + e.getMessage());
@@ -203,7 +203,7 @@ public class PayOSController {
             Map<String, Object> response = new HashMap<>();
             Map<String, Object> dataPayment = (Map<String, Object>) info.get("data");
             response.put("code", 200);
-            response.put("message", "Lấy đơn hàng thành công");
+            response.put("message", "Take payment successfully");
             response.put("data", dataPayment);
             return ResponseEntity.ok(response);
         } catch (Exception e) {

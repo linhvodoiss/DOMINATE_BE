@@ -21,7 +21,7 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
                                         AuthenticationException exception) throws IOException {
 
         int status = HttpServletResponse.SC_UNAUTHORIZED;
-        String message = "Tài khoản và mật khẩu không chính xác.";
+        String message = "Username and password is incorrect.";
 
         response.setStatus(status);
         response.setContentType("application/json; charset=UTF-8");

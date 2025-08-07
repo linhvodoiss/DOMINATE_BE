@@ -17,7 +17,7 @@ public class GlobalExceptionHandler {
                 .stream()
                 .findFirst()
                 .map(error -> error.getDefaultMessage())
-                .orElse("Dữ liệu không hợp lệ");
+                .orElse("Data is not valid");
 
         SuccessResponse<Object> response = new SuccessResponse<>(411, errorMessage, null);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
@@ -27,7 +27,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<SuccessResponse<Object>> handleAllExceptions(Exception ex) {
         ex.printStackTrace();
 
-        SuccessResponse<Object> response = new SuccessResponse<>(500, "Lỗi hệ thống.", null);
+        SuccessResponse<Object> response = new SuccessResponse<>(500, "System error.", null);
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

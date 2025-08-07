@@ -29,16 +29,16 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         if (exception instanceof AccountNotActivatedException) {
             error.put("code", 401);
-            error.put("message", "Tài khoản của bạn chưa được kích hoạt");
+            error.put("message", "Your account is not active.");
         } else if (exception instanceof AccountBannedException) {
             error.put("code", 403);
-            error.put("message", "Tài khoản của bạn đã bị khóa");
+            error.put("message", "Your account is banned.");
         } else if (exception instanceof BadCredentialsException) {
             error.put("code", 401);
-            error.put("message", "Tài khoản hoặc mật khẩu không đúng");
+            error.put("message", "Username and password incorrect.");
         } else {
             error.put("code", 401);
-            error.put("message", "Đăng nhập thất bại");
+            error.put("message", "Login failed.");
         }
 
         response.getWriter().write(mapper.writeValueAsString(error));

@@ -67,11 +67,11 @@ public class PaymentOrderService implements IPaymentOrderService {
     @Override
     public PaymentOrderDTO createOrder(OrderFormCreating form, Long userId) {
         SubscriptionPackage subscription = subscriptionRepository.findById(form.getSubscriptionId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy gói đăng ký"));
+                .orElseThrow(() -> new RuntimeException("Not found package plan"));
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+                .orElseThrow(() -> new RuntimeException("Not found user"));
         if (repository.existsByOrderId(form.getOrderId())) {
-            throw new RuntimeException("Mã orderId đã tồn tại");
+            throw new RuntimeException("Code orderId is exist");
         }
 
         PaymentOrder order = new PaymentOrder();
@@ -104,7 +104,7 @@ public class PaymentOrderService implements IPaymentOrderService {
     public void updateOrderFromWebhook(int orderCode, String internalStatus,
                                        String bin, String accountName, String accountNumber,String dateTransfer, String ip) {
         PaymentOrder order = repository.findByOrderId(orderCode)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với orderCode: " + orderCode));
+                .orElseThrow(() -> new RuntimeException("Not found order with orderCode: " + orderCode));
 
         // Update information from webhook
         if (bin != null) order.setBin(bin);
@@ -123,7 +123,7 @@ public class PaymentOrderService implements IPaymentOrderService {
     @Override
     public void syncBill(int orderCode, String bin, String accountName, String accountNumber,String dateTransfer) {
         PaymentOrder order = repository.findByOrderId(orderCode)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với orderCode: " + orderCode));
+                .orElseThrow(() -> new RuntimeException("Not found order with orderCode: " + orderCode));
 
         // Update information from webhook
         if (bin != null) order.setBin(bin);
@@ -140,7 +140,7 @@ public class PaymentOrderService implements IPaymentOrderService {
     @Override
     public void addReasonCancel(int orderCode, String cancelReason,String dateTransfer) {
         PaymentOrder order = repository.findByOrderId(orderCode)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với orderCode: " + orderCode));
+                .orElseThrow(() -> new RuntimeException("Not found order with orderCode: " + orderCode));
 
         // Update information from webhook
 
@@ -158,7 +158,7 @@ public class PaymentOrderService implements IPaymentOrderService {
     @Override
     public PaymentOrder changeStatusOrder(Long orderId, String newStatus) {
         PaymentOrder order = repository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
+                .orElseThrow(() -> new RuntimeException("Not found order"));
 
         try {
             PaymentOrder.PaymentStatus status = PaymentOrder.PaymentStatus.valueOf(newStatus);

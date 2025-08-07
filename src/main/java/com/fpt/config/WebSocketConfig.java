@@ -1,4 +1,5 @@
 package com.fpt.config;// WebSocketConfig.java
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.*;
@@ -6,17 +7,18 @@ import org.springframework.web.socket.config.annotation.*;
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
-
+    @Value("${frontend.url}")
+    private String frontendUrl;
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/topic"); // nơi client sẽ subscribe
-        config.setApplicationDestinationPrefixes("/app"); // nếu client gửi lên (không cần dùng nếu chỉ push từ server)
+        config.enableSimpleBroker("/topic"); //  client send subscribe
+        config.setApplicationDestinationPrefixes("/app"); // if client send (push from server)
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws") // endpoint kết nối websocket
-                .setAllowedOriginPatterns("http://localhost:3001")
-                .withSockJS(); // hỗ trợ SockJS (fallback nếu không hỗ trợ websocket gốc)
+        registry.addEndpoint("/ws") // endpoint connect websocket
+                .setAllowedOriginPatterns(frontendUrl)
+                .withSockJS(); // support SockJS (fallback if no support)
     }
 }

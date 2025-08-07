@@ -42,8 +42,8 @@ public class EmailService implements IEmailService {
 
 		String confirmationUrl = frontendUrl +"/active?token=" + token;
 
-		String subject = "Xác Nhận Đăng Ký Account";
-		String content = "Bạn đã đăng ký thành công. Click vào link dưới đây để kích hoạt tài khoản \n"
+		String subject = "Confirm Register Account";
+		String content = "Register account success. Click link here to active account \n"
 				+ confirmationUrl;
 
 		sendEmail(email, subject, content);
@@ -57,8 +57,8 @@ public class EmailService implements IEmailService {
 
 		String confirmationUrl = frontendUrl +"/new-password?token=" + token;
 
-		String subject = "Thiết lập lại mật khẩu";
-		String content = "Click vào link dưới đây để thiết lập lại mật khẩu (nếu không phải bạn xin vui lòng bỏ qua).\n"
+		String subject = "Reset Password";
+		String content = "Click link here to reset password (if not you, skip).\n"
 				+ confirmationUrl;
 
 		sendEmail(email, subject, content);
@@ -69,7 +69,7 @@ public class EmailService implements IEmailService {
 		User user = userService.findUserByEmail(email);
 
 		if (user == null) {
-			throw new IllegalArgumentException("Không tìm thấy người dùng với email: " + email);
+			throw new IllegalArgumentException("Not found user with email: " + email);
 		}
 
 		String confirmationUrl = frontendUrl +"/orders/" + packageId + "?orderId=" + orderId;
