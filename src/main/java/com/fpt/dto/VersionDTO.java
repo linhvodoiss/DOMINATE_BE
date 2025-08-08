@@ -12,6 +12,7 @@ public class VersionDTO {
     private Long id;
     private String version;
     private String description;
+    private Boolean isActive;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

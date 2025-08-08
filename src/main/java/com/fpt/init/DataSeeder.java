@@ -142,8 +142,8 @@ public class DataSeeder implements CommandLineRunner {
 
         if (versionRepository.count() == 0) {
             List<Version> versions = Arrays.asList(
-                    Version.builder().version("v1.0").description("Phiên bản đầu tiên của hệ thống").isDeleted(false).build(),
-                    Version.builder().version("v1.1").description("Bổ sung thêm chức năng tìm kiếm").isDeleted(false).build()
+                    Version.builder().version("v1.0").description("Phiên bản đầu tiên của hệ thống").isActive(true).isDeleted(false).build(),
+                    Version.builder().version("v1.1").description("Bổ sung thêm chức năng tìm kiếm").isActive(true).isDeleted(false).build()
             );
             versionRepository.saveAll(versions);
         }
@@ -159,9 +159,9 @@ public class DataSeeder implements CommandLineRunner {
 
         if (docRepository.count() == 0) {
             List<Doc> docs = Arrays.asList(
-                    Doc.builder().version(versionRepository.findById(1L).orElse(null)).category(categoryRepository.findById(1L).orElse(null)).title("Cách đăng ký tài khoản").slug("dang-ky-tai-khoan").content("Bạn cần điền email và mật khẩu...").order(1).isActive(true).isDeleted(false).build(),
-                    Doc.builder().version(versionRepository.findById(1L).orElse(null)).category(categoryRepository.findById(2L).orElse(null)).title("Tôi quên mật khẩu, làm sao lấy lại?").slug("quen-mat-khau").content("Bạn có thể nhấn vào 'Quên mật khẩu'.").order(1).isActive(true).isDeleted(false).build(),
-                    Doc.builder().version(versionRepository.findById(2L).orElse(null)).category(categoryRepository.findById(3L).orElse(null)).title("v1.1 - Thêm chức năng tìm kiếm").slug("v1-1-search-update").content("Chúng tôi đã thêm chức năng tìm kiếm...").order(1).isActive(true).isDeleted(false).build()
+                    Doc.builder().category(categoryRepository.findById(1L).orElse(null)).title("Cách đăng ký tài khoản").slug("dang-ky-tai-khoan").content("Bạn cần điền email và mật khẩu...").order(1).isActive(true).isDeleted(false).build(),
+                    Doc.builder().category(categoryRepository.findById(2L).orElse(null)).title("Tôi quên mật khẩu, làm sao lấy lại?").slug("quen-mat-khau").content("Bạn có thể nhấn vào 'Quên mật khẩu'.").order(1).isActive(true).isDeleted(false).build(),
+                    Doc.builder().category(categoryRepository.findById(3L).orElse(null)).title("v1.1 - Thêm chức năng tìm kiếm").slug("v1-1-search-update").content("Chúng tôi đã thêm chức năng tìm kiếm...").order(1).isActive(true).isDeleted(false).build()
             );
             docRepository.saveAll(docs);
         }

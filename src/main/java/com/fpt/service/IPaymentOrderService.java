@@ -14,8 +14,8 @@ import java.util.Map;
 import java.util.Optional;
 
 public interface IPaymentOrderService {
-    Page<PaymentOrderDTO> getAllPackage(Pageable pageable, String search, Long subscriptionId, PaymentOrder.PaymentStatus status, SubscriptionPackage.TypePackage type);
-    Page<PaymentOrderDTO> getUserPackage(Pageable pageable, String search,Long subscriptionId, PaymentOrder.PaymentStatus status, Long userId,SubscriptionPackage.TypePackage type);
+    Page<PaymentOrderDTO> getAllOrder(Pageable pageable, String search, Long subscriptionId, PaymentOrder.PaymentStatus status, SubscriptionPackage.TypePackage type);
+    Page<PaymentOrderDTO> getUserOrder(Pageable pageable, String search,Long subscriptionId, PaymentOrder.PaymentStatus status, Long userId,SubscriptionPackage.TypePackage type);
     List<PaymentOrderDTO> convertToDto(List<PaymentOrder> paymentOrders);
     PaymentOrderDTO createOrder(OrderFormCreating form, Long userId);
     void updateOrderFromWebhook(int orderCode, String internalStatus,

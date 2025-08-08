@@ -41,14 +41,14 @@ public class PaymentOrderService implements IPaymentOrderService {
     private PaymentSocketService paymentSocketService;
 
     @Override
-    public Page<PaymentOrderDTO> getAllPackage(Pageable pageable, String search,Long subscriptionId, PaymentOrder.PaymentStatus status,SubscriptionPackage.TypePackage type) {
+    public Page<PaymentOrderDTO> getAllOrder(Pageable pageable, String search,Long subscriptionId, PaymentOrder.PaymentStatus status,SubscriptionPackage.TypePackage type) {
         PaymentOrderSpecificationBuilder specification = new PaymentOrderSpecificationBuilder(search,subscriptionId,status,type);
         return repository.findAll(specification.build(), pageable).map(this::toDto);
 
     }
 
     @Override
-    public Page<PaymentOrderDTO> getUserPackage(Pageable pageable, String search, Long subscriptionId, PaymentOrder.PaymentStatus status, Long userId,SubscriptionPackage.TypePackage type) {
+    public Page<PaymentOrderDTO> getUserOrder(Pageable pageable, String search, Long subscriptionId, PaymentOrder.PaymentStatus status, Long userId,SubscriptionPackage.TypePackage type) {
         PaymentOrderSpecificationBuilder specification = new PaymentOrderSpecificationBuilder(search,subscriptionId,status,userId,type);
         return repository.findAll(specification.build(), pageable).map(this::toDto);
 

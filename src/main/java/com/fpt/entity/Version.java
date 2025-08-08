@@ -27,6 +27,8 @@ public class Version {
     private String version;
 
     private String description;
+
+    private Boolean isActive = true;
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted = false;
 
@@ -40,6 +42,4 @@ public class Version {
     @OneToMany(mappedBy = "version", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Category> categories;
 
-    @OneToMany(mappedBy = "version", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Doc> docs;
 }

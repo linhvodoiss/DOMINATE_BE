@@ -15,8 +15,8 @@ public class DocDTO {
     private String content;
     private Integer order;
     private Boolean isActive;
-    private Integer categoryId;
-    private Integer versionId;
+    private Long categoryId;
+    private CategoryDTO category;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

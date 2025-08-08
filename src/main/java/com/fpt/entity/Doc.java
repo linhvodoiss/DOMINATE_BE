@@ -23,10 +23,6 @@ public class Doc {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "version_id", nullable = false)
-    private Version version;
-
-    @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 

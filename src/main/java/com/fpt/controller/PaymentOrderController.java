@@ -50,8 +50,8 @@ public class PaymentOrderController {
             @RequestParam(required = false) PaymentOrder.PaymentStatus status,
             @RequestParam(required = false) SubscriptionPackage.TypePackage type
     ) {
-        Page<PaymentOrderDTO> dtoPage = service.getAllPackage(pageable, search,subscriptionId, status,type);
-        PaginatedResponse<PaymentOrderDTO> response = new PaginatedResponse<>(dtoPage, HttpServletResponse.SC_OK, "Lấy danh sách các đơn hàng trên hệ thống thành công");
+        Page<PaymentOrderDTO> dtoPage = service.getAllOrder(pageable, search,subscriptionId, status,type);
+        PaginatedResponse<PaymentOrderDTO> response = new PaginatedResponse<>(dtoPage, HttpServletResponse.SC_OK, "Take data order successfully");
         return ResponseEntity.ok(response);
     }
 
@@ -202,7 +202,7 @@ public class PaymentOrderController {
                                                              @RequestParam(required = false) PaymentOrder.PaymentStatus status,
                                                                            @RequestParam(required = false) SubscriptionPackage.TypePackage type
     ) {
-        Page<PaymentOrderDTO> dtoPage = service.getUserPackage(pageable, search,subscriptionId, status,userId,type);
+        Page<PaymentOrderDTO> dtoPage = service.getUserOrder(pageable, search,subscriptionId, status,userId,type);
         PaginatedResponse<PaymentOrderDTO> response = new PaginatedResponse<>(dtoPage, HttpServletResponse.SC_OK, "Lấy danh sách đơn hàng của bạn thành công");
         return ResponseEntity.ok(response);
     }

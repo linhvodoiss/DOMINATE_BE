@@ -1,44 +1,38 @@
 package com.fpt.specification;
 
 import com.fpt.entity.Category;
+import com.fpt.entity.Version;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
 
-public class CategorySpecificationBuilder {
+public class VersionSpecificationBuilder {
 
     private final String search;
     private final Boolean isActive;
-    private final Long versionId;
 
-    public CategorySpecificationBuilder(String search,  Boolean isActive,Long versionId) {
+
+    public VersionSpecificationBuilder(String search, Boolean isActive) {
         this.search = search;
         this.isActive=isActive;
-        this.versionId=versionId;
     }
 
-    public Specification<Category> build() {
-        Specification<Category> spec = Specification.where(null);
+    public Specification<Version> build() {
+        Specification<Version> spec = Specification.where(null);
 
         // search field free text
         if (StringUtils.hasText(search)) {
-            String[] fields = {"name"};
+            String[] fields = {"version","description"};
             for (String field : fields) {
                 SearchCriteria criteria = new SearchCriteria(field, "Like", search);
-                spec = spec.or(new CategorySpecification(criteria));
+                spec = spec.or(new VersionSpecification(criteria));
             }
         }
 
         // filter by active
         if (isActive != null) {
             SearchCriteria statusCriteria = new SearchCriteria("isActive", "Equal", isActive);
-            spec = spec.and(new CategorySpecification(statusCriteria));
+            spec = spec.and(new VersionSpecification(statusCriteria));
         }
-
-
-        if (versionId != null) {
-            spec = spec.and((root, query, cb) -> cb.equal(root.get("version").get("id"), versionId));
-        }
-
         return spec;
     }
 }

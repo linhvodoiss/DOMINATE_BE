@@ -15,6 +15,7 @@ public class CategoryDTO {
 	private Long order;
 	private Boolean isActive;
 	private Long versionId;
+	private VersionDTO version;
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
 }
