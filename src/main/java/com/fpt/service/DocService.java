@@ -32,14 +32,14 @@ public class DocService implements IDocService {
     }
 
     @Override
-    public Page<DocDTO> getAllDoc(Pageable pageable, String search, Boolean isActive,Long categoryId) {
-        DocSpecificationBuilder specification = new DocSpecificationBuilder(search,isActive,categoryId);
+    public Page<DocDTO> getAllDoc(Pageable pageable, String search, Boolean isActive,Long categoryId,Long versionId) {
+        DocSpecificationBuilder specification = new DocSpecificationBuilder(search,isActive,categoryId,versionId);
         return docRepository.findAll(specification.build(), pageable).map(this::toDto);
     }
 
     @Override
-    public Page<DocDTO> getAllDocCustomer(Pageable pageable, String search,Long categoryId) {
-        DocSpecificationBuilder specification = new DocSpecificationBuilder(search,true,categoryId);
+    public Page<DocDTO> getAllDocCustomer(Pageable pageable, String search,Long categoryId,Long versionId) {
+        DocSpecificationBuilder specification = new DocSpecificationBuilder(search,true,categoryId,versionId);
         return docRepository.findAll(specification.build(), pageable).map(this::toDto);
     }
     public DocDTO getByIdIfActive(Long id) {
@@ -66,7 +66,6 @@ public class DocService implements IDocService {
                 .slug(dto.getSlug())
                 .content(dto.getContent())
                 .order(dto.getOrder())
-                .isActive(dto.getIsActive())
                 .category(category)
                 .build();
 
@@ -111,6 +110,19 @@ public class DocService implements IDocService {
     private DocDTO toDto(Doc entity) {
         Category category = entity.getCategory();
         CategoryDTO categoryDTO = null;
+        Version version = category.getVersion();
+        VersionDTO versionDTO = null;
+
+        if (version != null) {
+            versionDTO = VersionDTO.builder()
+                    .id(version.getId())
+                    .version(version.getVersion())
+                    .description(version.getDescription())
+                    .createdAt(version.getCreatedAt())
+                    .updatedAt(version.getUpdatedAt())
+                    .build();
+        }
+
         if (category != null) {
             categoryDTO = CategoryDTO.builder()
                     .id(category.getId())
@@ -119,6 +131,7 @@ public class DocService implements IDocService {
                     .order(category.getOrder())
                     .isActive(category.getIsActive())
                     .versionId(category.getVersion().getId())
+                    .version(versionDTO)
                     .createdAt(category.getCreatedAt())
                     .updatedAt(category.getUpdatedAt())
                     .build();

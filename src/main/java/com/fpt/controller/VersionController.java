@@ -26,7 +26,13 @@ import java.util.List;
 public class VersionController {
 
     private final IVersionService service;
-
+    @GetMapping("/list")
+    public ResponseEntity<SuccessResponse<List<VersionDTO>>> getAll() {
+        List<VersionDTO> versions = service.getAll();
+        return ResponseEntity.ok(
+                new SuccessResponse<>(200, "Get all versions successfully!", versions)
+        );
+    }
     @GetMapping()
     public ResponseEntity<PaginatedResponse<VersionDTO>> getAllVersions(
             @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable,

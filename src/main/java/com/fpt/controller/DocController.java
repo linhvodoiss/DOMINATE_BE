@@ -38,10 +38,11 @@ public ResponseEntity<PaginatedResponse<DocDTO>> getAllDocs(
         @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
         @RequestParam(required = false) String search,
         @RequestParam(required = false) Boolean isActive,
-          @RequestParam(required = false) Long categoryId
+          @RequestParam(required = false) Long categoryId,
+        @RequestParam(required = false) Long versionId
 
 ) {
-    Page<DocDTO> dtoPage = service.getAllDoc(pageable, search,isActive,categoryId);
+    Page<DocDTO> dtoPage = service.getAllDoc(pageable, search,isActive,categoryId,versionId);
     PaginatedResponse<DocDTO> response = new PaginatedResponse<>(dtoPage, HttpServletResponse.SC_OK, "Take list doc successfully.");
     return ResponseEntity.ok(response);
 }
@@ -49,10 +50,11 @@ public ResponseEntity<PaginatedResponse<DocDTO>> getAllDocs(
     public ResponseEntity<PaginatedResponse<DocDTO>> getAllDocsCustomer(
             @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(required = false) String search,
-            @RequestParam(required = false) Long categoryId
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) Long versionId
 
     ) {
-        Page<DocDTO> dtoPage = service.getAllDocCustomer(pageable, search,categoryId);
+        Page<DocDTO> dtoPage = service.getAllDocCustomer(pageable, search,categoryId,versionId);
         PaginatedResponse<DocDTO> response = new PaginatedResponse<>(dtoPage, HttpServletResponse.SC_OK, "Take list doc successfully.");
         return ResponseEntity.ok(response);
     }

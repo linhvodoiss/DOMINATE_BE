@@ -8,8 +8,8 @@ import java.util.List;
 
 public interface IDocService {
     List<DocDTO> getAll();
-    Page<DocDTO> getAllDoc(Pageable pageable, String search, Boolean isActive,Long categoryId);
-    Page<DocDTO> getAllDocCustomer(Pageable pageable, String search,Long categoryId);
+    Page<DocDTO> getAllDoc(Pageable pageable, String search, Boolean isActive,Long categoryId,Long versionId);
+    Page<DocDTO> getAllDocCustomer(Pageable pageable, String search,Long categoryId,Long versionId);
     DocDTO getByIdIfActive(Long id);
     DocDTO getById(Long id);
     DocDTO create(DocDTO dto);

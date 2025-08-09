@@ -10,11 +10,13 @@ public class DocSpecificationBuilder {
 	private final String search;
 	private final Boolean isActive;
 	private final Long categoryId;
+	private final Long versionId;
 
-	public DocSpecificationBuilder(String search,  Boolean isActive,Long categoryId) {
+	public DocSpecificationBuilder(String search,  Boolean isActive,Long categoryId,Long versionId) {
 		this.search = search;
 		this.isActive=isActive;
 		this.categoryId=categoryId;
+		this.versionId=versionId;
 	}
 
 	public Specification<Doc> build() {
@@ -39,7 +41,9 @@ public class DocSpecificationBuilder {
 		if (categoryId != null) {
 			spec = spec.and((root, query, cb) -> cb.equal(root.get("category").get("id"), categoryId));
 		}
-
+		if (versionId != null) {
+			spec = spec.and((root, query, cb) -> cb.equal(root.get("category").get("version").get("id"), versionId));
+		}
 		return spec;
 	}
 }

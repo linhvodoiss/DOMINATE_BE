@@ -3,6 +3,7 @@ package com.fpt.service;
 import com.fpt.dto.DocDTO;
 import com.fpt.dto.VersionDTO;
 import com.fpt.entity.Doc;
+import com.fpt.entity.Option;
 import com.fpt.entity.Version;
 import com.fpt.repository.VersionRepository;
 import com.fpt.specification.DocSpecificationBuilder;
@@ -56,7 +57,9 @@ public class VersionService implements IVersionService {
 
     @Override
     public VersionDTO create(VersionDTO dto) {
-        Version version = toEntity(dto);
+        Version version = new Version();
+        version.setVersion(dto.getVersion());
+        version.setDescription(dto.getDescription());
         return toDto(versionRepository.save(version));
     }
 
@@ -93,6 +96,7 @@ public class VersionService implements IVersionService {
                 .id(version.getId())
                 .version(version.getVersion())
                 .description(version.getDescription())
+                .isActive(version.getIsActive())
                 .createdAt(version.getCreatedAt())
                 .updatedAt(version.getUpdatedAt())
                 .build();

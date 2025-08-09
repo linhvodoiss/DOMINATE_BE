@@ -25,6 +25,13 @@ import java.util.List;
 public class CategoryController {
 
 	private final ICategoryService service;
+	    @GetMapping("/list")
+		public ResponseEntity<SuccessResponse<List<CategoryDTO>>> getAll() {
+			List<CategoryDTO> categories = service.getAll();
+			return ResponseEntity.ok(
+					new SuccessResponse<>(200, "Get all categories successfully!", categories)
+			);
+		}
 
 	@GetMapping()
 	public ResponseEntity<PaginatedResponse<CategoryDTO>> getAllCategories(
