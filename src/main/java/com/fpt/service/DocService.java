@@ -60,14 +60,12 @@ public class DocService implements IDocService {
     public DocDTO create(DocDTO dto) {
         Category category = categoryRepository.findById(Long.valueOf(dto.getCategoryId()))
                 .orElseThrow(() -> new RuntimeException("Category not found with id: " + dto.getCategoryId()));
-
-        Doc doc = Doc.builder()
-                .title(dto.getTitle())
-                .slug(dto.getSlug())
-                .content(dto.getContent())
-                .order(dto.getOrder())
-                .category(category)
-                .build();
+        Doc doc=new Doc();
+        doc.setTitle(dto.getTitle());
+        doc.setSlug(dto.getSlug());
+        doc.setOrder(dto.getOrder());
+        doc.setContent(dto.getContent());
+        doc.setCategory(category);
 
         return toDto(docRepository.save(doc));
     }
@@ -118,6 +116,7 @@ public class DocService implements IDocService {
                     .id(version.getId())
                     .version(version.getVersion())
                     .description(version.getDescription())
+                    .isActive(version.getIsActive())
                     .createdAt(version.getCreatedAt())
                     .updatedAt(version.getUpdatedAt())
                     .build();

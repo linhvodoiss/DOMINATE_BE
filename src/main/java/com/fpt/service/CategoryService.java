@@ -63,15 +63,11 @@ public class CategoryService implements ICategoryService {
 	public CategoryDTO create(CategoryDTO dto) {
 		Version version = versionRepository.findById(dto.getVersionId())
 				.orElseThrow(() -> new RuntimeException("Version not found with id: " + dto.getVersionId()));
-
-		Category category = Category.builder()
-				.name(dto.getName())
-				.slug(dto.getSlug())
-				.order(dto.getOrder())
-				.isActive(dto.getIsActive())
-				.version(version)
-				.build();
-
+Category category=new Category();
+		category.setName(dto.getName());
+		category.setSlug(dto.getSlug());
+		category.setOrder(dto.getOrder());
+		category.setVersion(version);
 		return toDto(categoryRepository.save(category));
 	}
 
@@ -117,6 +113,7 @@ public class CategoryService implements ICategoryService {
 					.id(version.getId())
 					.version(version.getVersion())
 					.description(version.getDescription())
+					.isActive(version.getIsActive())
 					.createdAt(version.getCreatedAt())
 					.updatedAt(version.getUpdatedAt())
 					.build();
