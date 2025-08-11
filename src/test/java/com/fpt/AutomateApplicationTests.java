@@ -20,10 +20,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.*;
 
@@ -64,16 +66,25 @@ class CategoryServiceTest {
 				.build();
 	}
 
+	// Positive: ADMIN can list categories
 	@Test
-	void testGetAll() {
+	void testGetAll_WhenUserIsAdmin_ShouldReturnAllCategories() {
+		// Simulate user context with ADMIN role (@WithMockUser(roles = "ADMIN") in Spring)
 		when(categoryRepository.findAll()).thenReturn(List.of(category));
-
 		var result = categoryService.getAll();
-
 		assertThat(result).hasSize(1);
 		assertThat(result.get(0).getName()).isEqualTo("Test category");
 		verify(categoryRepository, times(1)).findAll();
 	}
+
+	// Negative: Non-ADMIN cannot list categories
+	@Test
+	void testGetAll_WhenUserIsNotAdmin_ShouldThrowAccessDenied() {
+		// Simulate user with USER role or without ADMIN
+		assertThrows(AccessDeniedException.class, () -> categoryService.getAll());
+		verify(categoryRepository, never()).findAll();
+	}
+
 
 
 
@@ -201,7 +212,7 @@ class UserServiceTest {
 				.build();
 
 		User u2 = User.builder()
-				.id(2L).userName("bob").email("bob@example.com")
+				.id(2L).userName("bob").email("bob")
 				.firstName("Bob").lastName("Johnson")
 				.phoneNumber("0987654321")
 				.role(Role.CUSTOMER).status(UserStatus.ACTIVE)
