@@ -13,7 +13,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +45,48 @@ public class DocService implements IDocService {
         DocSpecificationBuilder specification = new DocSpecificationBuilder(search,true,categoryId,versionId);
         return docRepository.findAll(specification.build(), pageable).map(this::toDto);
     }
+
+    @Override
+    public List<Map<String, Object>> getDocsByAllVersions() {
+        List<Version> versions = versionRepository.findByIsActiveTrueOrderByCreatedAtDesc();
+
+        return versions.stream()
+                .map(version -> {
+                    List<Category> categories = categoryRepository.findByVersionIdAndIsActiveTrue(version.getId());
+
+                    List<Map<String, Object>> categoryList = categories.stream()
+                            .map(category -> {
+                                List<Map<String, Object>> docList = category.getDocs().stream()
+                                        .filter(Doc::getIsActive)
+                                        .map(doc -> {
+                                            Map<String, Object> docMap = new HashMap<>();
+                                            docMap.put("docId", doc.getId());
+                                            docMap.put("docName", doc.getTitle());
+                                            return docMap;
+                                        })
+                                        .toList();
+
+                                if (docList.isEmpty()) return null;
+
+                                Map<String, Object> categoryMap = new HashMap<>();
+                                categoryMap.put("categoryId", category.getId());
+                                categoryMap.put("categoryName", category.getName());
+                                categoryMap.put("docs", docList);
+                                return categoryMap;
+                            })
+                            .filter(Objects::nonNull)
+                            .toList();
+
+                    Map<String, Object> versionMap = new HashMap<>();
+                    versionMap.put("versionId", version.getId());
+                    versionMap.put("versionName", version.getVersion());
+                    versionMap.put("categories", categoryList);
+
+                    return versionMap;
+                })
+                .toList();
+    }
+
     public DocDTO getByIdIfActive(Long id) {
         return docRepository.findById(id)
                 .filter(Doc::getIsActive)
