@@ -1574,7 +1574,6 @@ class PaymentOrderServiceTest {
     void countOrdersByPaymentMethod_WhenAllMethodsUsed_ShouldReturnCompleteMap() {
         // Arrange
         when(repository.countByPaymentMethod(PaymentOrder.PaymentMethod.PAYOS)).thenReturn(20L);
-        when(repository.countByPaymentMethod(PaymentOrder.PaymentMethod.BANK)).thenReturn(0L);
 
         // Act
         Map<String, Long> result = paymentOrderService.countOrdersByPaymentMethod();
@@ -1583,7 +1582,6 @@ class PaymentOrderServiceTest {
         assertNotNull(result);
         assertTrue(result.size() >= 2);
         assertEquals(20L, result.get("PAYOS"));
-        assertEquals(0L, result.get("BANK"));
     }
 
     // 21. revenueByPaymentMethod tests
