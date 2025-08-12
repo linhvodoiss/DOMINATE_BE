@@ -32,7 +32,7 @@ public class Doc {
     @Column(nullable = false, unique = true)
     private String slug;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "LONGTEXT")
     private String content;
     @Column(name = "`order`")
     private Integer order;

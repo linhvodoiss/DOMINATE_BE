@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/docs")
@@ -46,19 +47,28 @@ public ResponseEntity<PaginatedResponse<DocDTO>> getAllDocs(
     PaginatedResponse<DocDTO> response = new PaginatedResponse<>(dtoPage, HttpServletResponse.SC_OK, "Take list doc successfully.");
     return ResponseEntity.ok(response);
 }
+//    @GetMapping("/customer")
+//    public ResponseEntity<PaginatedResponse<DocDTO>> getAllDocsCustomer(
+//            @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
+//            @RequestParam(required = false) String search,
+//            @RequestParam(required = false) Long categoryId,
+//            @RequestParam(required = false) Long versionId
+//
+//    ) {
+//        Page<DocDTO> dtoPage = service.getAllDocCustomer(pageable, search,categoryId,versionId);
+//        PaginatedResponse<DocDTO> response = new PaginatedResponse<>(dtoPage, HttpServletResponse.SC_OK, "Take list doc successfully.");
+//        return ResponseEntity.ok(response);
+//    }
+
     @GetMapping("/customer")
-    public ResponseEntity<PaginatedResponse<DocDTO>> getAllDocsCustomer(
-            @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
-            @RequestParam(required = false) String search,
-            @RequestParam(required = false) Long categoryId,
-            @RequestParam(required = false) Long versionId
-
-    ) {
-        Page<DocDTO> dtoPage = service.getAllDocCustomer(pageable, search,categoryId,versionId);
-        PaginatedResponse<DocDTO> response = new PaginatedResponse<>(dtoPage, HttpServletResponse.SC_OK, "Take list doc successfully.");
-        return ResponseEntity.ok(response);
+    public ResponseEntity<?> getDocsForCustomer() {
+        List<Map<String, Object>> docs = service.getDocsByAllVersions();
+        return ResponseEntity.ok(Map.of(
+                "code", 200,
+                "message", "Get docs successfully!",
+                "data", docs
+        ));
     }
-
 
     @GetMapping("/{id}")
     public ResponseEntity<SuccessResponse<DocDTO>> getById(@PathVariable Long id) {
