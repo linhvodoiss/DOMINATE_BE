@@ -15,11 +15,14 @@ import com.fpt.repository.ResetPasswordTokenRepository;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import java.io.UnsupportedEncodingException;
 
 @Component
 public class EmailService implements IEmailService {
 	@Value("${frontend.url}")
 	private String frontendUrl;
+	@Value("${spring.mail.admin}")
+	private String emailAdmin;
 
 	@Autowired
 	private IUserService userService;
@@ -42,9 +45,14 @@ public class EmailService implements IEmailService {
 
 		String confirmationUrl = frontendUrl +"/active?token=" + token;
 
-		String subject = "Confirm Register Account";
-		String content = "Register account success. Click link here to active account \n"
-				+ confirmationUrl;
+		String subject = "Confirm Your Account Registration";
+		String content = "<html><body>" +
+				"<p>Hi <strong>" + user.getFirstName() + "</strong>,</p>" +
+				"<p>Thank you for registering your account with DOMinate.</p>" +
+				"<p>Please <a href=\"" + confirmationUrl + "\"><strong>click here to activate your account</strong></a>.</p>" +
+				"<p>If you did not register, please ignore this email.</p>" +
+				"<br/><p>Best regards,<br/>DOMinate Team</p>" +
+				"</body></html>";
 
 		sendEmail(email, subject, content);
 	}
@@ -57,9 +65,14 @@ public class EmailService implements IEmailService {
 
 		String confirmationUrl = frontendUrl +"/new-password?token=" + token;
 
-		String subject = "Reset Password";
-		String content = "Click link here to reset password (if not you, skip).\n"
-				+ confirmationUrl;
+		String subject = "Reset Your Password";
+		String content = "<html><body>" +
+				"<p>Hi <strong>" + user.getFirstName() + "</strong>,</p>" +
+				"<p>We received a request to reset your password.</p>" +
+				"<p>Please <a href=\"" + confirmationUrl + "\"><strong>click here to reset your password</strong></a>.</p>" +
+				"<p>If you did not make this request, you can safely ignore this email.</p>" +
+				"<br/><p>Best regards,<br/>DOMinate Team</p>" +
+				"</body></html>";
 
 		sendEmail(email, subject, content);
 	}
@@ -97,7 +110,7 @@ public class EmailService implements IEmailService {
 	}
 
 	@Override
-	public void sendEmailReport(String email, Long packageId, Integer orderId, String content) {
+	public void sendEmailReport(Long packageId, Integer orderId, String content) {
 
 		String confirmationUrl = frontendUrl +"/admin/preview/"  + orderId;
 
@@ -106,7 +119,7 @@ public class EmailService implements IEmailService {
 				+ "<p>Check <a href=\"" + confirmationUrl + "\">click here to view order </a>.</p>";
 
 
-		sendEmail(email, subject, contentMess);
+		sendEmail(emailAdmin, subject, contentMess);
 		paymentSocketService.notifyOrderReport(orderId, content);
 	}
 
@@ -121,11 +134,13 @@ public class EmailService implements IEmailService {
 			helper.setTo(recipientEmail);
 			helper.setSubject(subject);
 			helper.setText(content, true);
-
+			helper.setFrom("noreply@dominate.com", "DOMinate Team");
 			mailSender.send(message);
 		} catch (MessagingException e) {
 			throw new RuntimeException("Failed to send email", e);
-		}
-	}
+		} catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 }

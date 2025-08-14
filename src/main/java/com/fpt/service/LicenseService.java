@@ -3,10 +3,7 @@ package com.fpt.service;
 import com.fpt.dto.LicenseDTO;
 import com.fpt.dto.PaymentOrderDTO;
 import com.fpt.dto.SubscriptionPackageDTO;
-import com.fpt.entity.License;
-import com.fpt.entity.PaymentOrder;
-import com.fpt.entity.SubscriptionPackage;
-import com.fpt.entity.User;
+import com.fpt.entity.*;
 import com.fpt.form.LicenseCreateForm;
 import com.fpt.form.LicenseVerifyRequestForm;
 import com.fpt.payload.LicenseVerifyResponse;
@@ -153,6 +150,14 @@ public class LicenseService implements ILicenseService {
     public LicenseDTO bindHardwareIdToLicense(LicenseCreateForm form) {
         License license = licenseRepository.findByLicenseKey(form.getLicenseKey())
                 .orElseThrow(() -> new IllegalArgumentException("License is not exist."));
+        User licenseOwner = license.getUser();
+
+        if (Boolean.FALSE.equals(licenseOwner.getIsActive())) {
+            throw new IllegalStateException("Owner is banned. License cannot be used.");
+        }
+        if (licenseOwner.getStatus()== UserStatus.NOT_ACTIVE) {
+            throw new IllegalStateException("This account is not active. License cannot be used.");
+        }
         if (!license.getSubscriptionPackage().getTypePackage().equals(form.getType())) {
             throw new IllegalStateException("License type mismatch.");
         }
