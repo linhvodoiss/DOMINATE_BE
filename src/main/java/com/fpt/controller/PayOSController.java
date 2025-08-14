@@ -21,6 +21,8 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -187,6 +189,25 @@ public class PayOSController {
             paymentOrderService.addReasonCancel(paymentLinkId,cancellationReason,canceledAt);
             return ResponseEntity.ok(
                     new SuccessResponse<>(200, "Cancel order successfully", cancelData)
+            );
+        } catch (Exception e) {
+            LOGGER.severe("❌ Lỗi huỷ đơn hàng: " + e.getMessage());
+            return ResponseEntity.status(500)
+                    .body(new SuccessResponse<>(500, e.getMessage(), null));
+        }
+    }
+
+    @PostMapping("/cancelPro/{paymentLinkId}")
+    public ResponseEntity<SuccessResponse<Map<String, Object>>> cancelProPaymentRequest(
+            @PathVariable("paymentLinkId") Integer paymentLinkId) {
+        try {
+            paymentOrderService.changeStatusOrderByOrderId(paymentLinkId, "FAILED");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            String cancellationReason = "Customer cancel from PayOS payment";
+            String canceledAt = LocalDateTime.now().format(formatter);
+            paymentOrderService.addReasonCancel(paymentLinkId,cancellationReason,canceledAt);
+            return ResponseEntity.ok(
+                    new SuccessResponse<>(200, "Cancel order successfully", null)
             );
         } catch (Exception e) {
             LOGGER.severe("❌ Lỗi huỷ đơn hàng: " + e.getMessage());
