@@ -185,10 +185,9 @@ public class PaymentOrderController {
     public ResponseEntity<SuccessNoResponse> sendEmailReport(
             @RequestParam("packageId") Long packageId,
             @RequestParam("orderId") Integer orderId,
-            @RequestParam("email") String email,
             @RequestParam("content") String content
     ) {
-        emailService.sendEmailReport(email, packageId, orderId,content);
+        emailService.sendEmailReport(packageId, orderId,content);
         return ResponseEntity.ok(new SuccessNoResponse(
                 200,
                 "Your report have been send."
