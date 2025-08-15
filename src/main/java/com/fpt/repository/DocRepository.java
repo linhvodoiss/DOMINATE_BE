@@ -10,5 +10,8 @@ import java.util.Optional;
 
 public interface DocRepository extends JpaRepository<Doc, Long>, JpaSpecificationExecutor<Doc> {
     Optional<Doc> findByIdAndIsActiveTrue(Long id);
+    boolean existsBySlug(String slug);
+
+    boolean existsBySlugAndIdNot(String slug, Long id);
 
 }

@@ -10,4 +10,7 @@ import java.util.List;
 public interface VersionRepository extends JpaRepository<Version, Long>, JpaSpecificationExecutor<Version> {
 
     List<Version> findByIsActiveTrueOrderByCreatedAtDesc();
+    boolean existsByVersion(String version);
+    boolean existsByVersionAndIdNot(String version, Long id);
+
 }

@@ -212,7 +212,7 @@ public class PaymentOrderService implements IPaymentOrderService {
         boolean hasActiveLicense = licenseRepository.existsByUserIdAndCanUsedTrue(userId);
 
         License license = new License();
-        license.setLicenseKey(LicenseKeyGenerate.generateLicenseKey());
+        license.setLicenseKey(LicenseKeyGenerate.generateUniqueLicenseKey(licenseRepository));
         license.setDuration(durationDays);
         license.setIp(ip);
         license.setUser(order.getUser());
