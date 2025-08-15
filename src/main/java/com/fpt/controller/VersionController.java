@@ -72,7 +72,9 @@ public class VersionController {
             VersionDTO saved = service.create(dto);
             return ResponseEntity.ok(new SuccessResponse<>(200, "Create successfully!", saved));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body(new SuccessResponse<>(500, "Create failed!", null));
+            return ResponseEntity
+                    .status(400)
+                    .body(new SuccessResponse<>(400, e.getMessage(), null));
         }
 
     }
@@ -83,7 +85,9 @@ public class VersionController {
             VersionDTO saved = service.update(id, dto);
             return ResponseEntity.ok(new SuccessResponse<>(200, "Update successfully!", saved));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body(new SuccessResponse<>(500, "Update failed!", null));
+            return ResponseEntity
+                    .status(400)
+                    .body(new SuccessResponse<>(400, e.getMessage(), null));
         }
     }
 

@@ -62,9 +62,15 @@ public class AdminController {
     }
     @PostMapping
     public ResponseEntity<SuccessResponse<UserDTO>> createUser(@RequestBody @Valid UserDTO userDTO) {
-        UserDTO createdUser = userService.addUserByAdmin(userDTO);
-        return ResponseEntity.ok(new SuccessResponse<>(200, "User created successfully", createdUser));
-    }
+        try {
+            UserDTO createdUser = userService.addUserByAdmin(userDTO);
+            return ResponseEntity.ok(new SuccessResponse<>(200, "User created successfully", createdUser));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(400)
+                    .body(new SuccessResponse<>(400, e.getMessage(), null));
+        }
+        }
 
 
     @PutMapping("/{id}")
@@ -72,8 +78,14 @@ public class AdminController {
             @PathVariable Long id,
             @RequestBody @Valid UserDTO userDTO
     ) {
+        try{
         UserDTO updatedUser = userService.updateUserByAdmin(id, userDTO);
         return ResponseEntity.ok(new SuccessResponse<>(200, "User updated successfully", updatedUser));
+    } catch (Exception e) {
+        return ResponseEntity
+                .status(400)
+                .body(new SuccessResponse<>(400, e.getMessage(), null));
+    }
     }
     @DeleteMapping("/{id}")
     public ResponseEntity<SuccessNoResponse> delete(@PathVariable Long id) {

@@ -55,8 +55,20 @@ public class VersionService implements IVersionService {
                 .orElseThrow(() -> new RuntimeException("Version is inactive or not found"));
     }
 
+    private boolean isVersionExist(String version, Long excludeId) {
+        if (excludeId == null) {
+            return versionRepository.existsByVersion(version);
+        }
+        return versionRepository.existsByVersionAndIdNot(version, excludeId);
+    }
+
+
     @Override
     public VersionDTO create(VersionDTO dto) {
+        if (isVersionExist(dto.getVersion(), null)) {
+            throw new RuntimeException("Version '" + dto.getVersion() + "' already exists.");
+        }
+
         Version version = new Version();
         version.setVersion(dto.getVersion());
         version.setDescription(dto.getDescription());
@@ -65,6 +77,10 @@ public class VersionService implements IVersionService {
 
     @Override
     public VersionDTO update(Long id, VersionDTO dto) {
+        if (isVersionExist(dto.getVersion(), id)) {
+            throw new RuntimeException("Version '" + dto.getVersion() + "' already exists.");
+        }
+
         Version version = versionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Version not found with id: " + id));
 
@@ -72,9 +88,9 @@ public class VersionService implements IVersionService {
         version.setDescription(dto.getDescription());
         version.setIsActive(dto.getIsActive());
 
-
         return toDto(versionRepository.save(version));
     }
+
 
 
     @Override

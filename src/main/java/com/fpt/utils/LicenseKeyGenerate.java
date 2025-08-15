@@ -1,5 +1,7 @@
 package com.fpt.utils;
 
+import com.fpt.repository.LicenseRepository;
+
 import java.security.SecureRandom;
 
 public class LicenseKeyGenerate {
@@ -17,5 +19,21 @@ public class LicenseKeyGenerate {
         }
 
         return key.toString(); // Example: DOM-K4L9-W3TZ-7XCU
+    }
+    public static String generateUniqueLicenseKey(LicenseRepository licenseRepository) {
+        String licenseKey;
+        int attempts = 0;
+
+        do {
+            licenseKey = generateLicenseKey();
+            attempts++;
+
+            if (attempts > 10) {
+                throw new RuntimeException("Failed to generate unique license key after 10 attempts.");
+            }
+
+        } while (licenseRepository.existsByLicenseKey(licenseKey));
+
+        return licenseKey;
     }
 }

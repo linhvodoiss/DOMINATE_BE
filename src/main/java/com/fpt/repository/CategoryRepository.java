@@ -10,5 +10,7 @@ import com.fpt.entity.Category;
 
 public interface CategoryRepository extends JpaRepository<Category, Long>, JpaSpecificationExecutor<Category> {
     List<Category> findByVersionIdAndIsActiveTrue(Long versionId);
+    boolean existsBySlug(String slug);
+    boolean existsBySlugAndIdNot(String slug, Long id);
 
 }

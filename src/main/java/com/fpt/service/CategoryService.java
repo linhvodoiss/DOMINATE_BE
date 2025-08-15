@@ -58,21 +58,37 @@ public class CategoryService implements ICategoryService {
 				.map(this::toDto)
 				.orElseThrow(() -> new RuntimeException("Category not found"));
 	}
-
+	private boolean isSlugExist(String slug, Long excludeId) {
+		if (excludeId == null) {
+			return categoryRepository.existsBySlug(slug);
+		}
+		return categoryRepository.existsBySlugAndIdNot(slug, excludeId);
+	}
 	@Override
 	public CategoryDTO create(CategoryDTO dto) {
+		if (isSlugExist(dto.getSlug(), null)) {
+			throw new RuntimeException("Slug '" + dto.getSlug() + "' already exists.");
+		}
+
 		Version version = versionRepository.findById(dto.getVersionId())
 				.orElseThrow(() -> new RuntimeException("Version not found with id: " + dto.getVersionId()));
-Category category=new Category();
+
+		Category category = new Category();
 		category.setName(dto.getName());
 		category.setSlug(dto.getSlug());
 		category.setOrder(dto.getOrder());
 		category.setVersion(version);
+
 		return toDto(categoryRepository.save(category));
 	}
 
+
 	@Override
 	public CategoryDTO update(Long id, CategoryDTO dto) {
+		if (isSlugExist(dto.getSlug(), id)) {
+			throw new RuntimeException("Slug '" + dto.getSlug() + "' already exists.");
+		}
+
 		Category category = categoryRepository.findById(id)
 				.orElseThrow(() -> new RuntimeException("Category not found with id: " + id));
 
@@ -89,6 +105,7 @@ Category category=new Category();
 
 		return toDto(categoryRepository.save(category));
 	}
+
 
 
 	@Override

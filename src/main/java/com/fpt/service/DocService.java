@@ -13,10 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -54,10 +51,13 @@ public class DocService implements IDocService {
                 .map(version -> {
                     List<Category> categories = categoryRepository.findByVersionIdAndIsActiveTrue(version.getId());
 
+                    // Sort category by order
                     List<Map<String, Object>> categoryList = categories.stream()
+                            .sorted(Comparator.comparingLong(a -> a.getOrder() != null ? a.getOrder() : Long.MAX_VALUE))
                             .map(category -> {
                                 List<Map<String, Object>> docList = category.getDocs().stream()
                                         .filter(Doc::getIsActive)
+                                        .sorted(Comparator.comparingInt(a -> a.getOrder() != null ? a.getOrder() : Integer.MAX_VALUE))
                                         .map(doc -> {
                                             Map<String, Object> docMap = new HashMap<>();
                                             docMap.put("docId", doc.getId());
@@ -87,6 +87,8 @@ public class DocService implements IDocService {
                 .toList();
     }
 
+
+
     public DocDTO getByIdIfActive(Long id) {
         return docRepository.findById(id)
                 .filter(Doc::getIsActive)
@@ -103,9 +105,14 @@ public class DocService implements IDocService {
 
     @Override
     public DocDTO create(DocDTO dto) {
+        if (isSlugExist(dto.getSlug(), null)) {
+            throw new RuntimeException("Slug '" + dto.getSlug() + "' already exists.");
+        }
+
         Category category = categoryRepository.findById(Long.valueOf(dto.getCategoryId()))
                 .orElseThrow(() -> new RuntimeException("Category not found with id: " + dto.getCategoryId()));
-        Doc doc=new Doc();
+
+        Doc doc = new Doc();
         doc.setTitle(dto.getTitle());
         doc.setSlug(dto.getSlug());
         doc.setOrder(dto.getOrder());
@@ -117,6 +124,10 @@ public class DocService implements IDocService {
 
     @Override
     public DocDTO update(Long id, DocDTO dto) {
+        if (isSlugExist(dto.getSlug(), id)) {
+            throw new RuntimeException("Slug '" + dto.getSlug() + "' already exists.");
+        }
+
         Doc doc = docRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Doc not found with id: " + id));
 
@@ -134,6 +145,14 @@ public class DocService implements IDocService {
 
         return toDto(docRepository.save(doc));
     }
+
+    private boolean isSlugExist(String slug, Long excludeId) {
+        if (excludeId == null) {
+            return docRepository.existsBySlug(slug);
+        }
+        return docRepository.existsBySlugAndIdNot(slug, excludeId);
+    }
+
 
 
     @Override
